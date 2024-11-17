@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json", // Extend from base config
+  "compilerOptions": {
+    // Use CommonJS module syntax
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    // Output directory for CJS
+    "outDir": "./dist/esm"
+  }
+}

@@ -1,7 +1,17 @@
 # React Native CLI Setup
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-red.svg)
+![Github License](https://img.shields.io/github/license/developer-sumit/react-native-cli-setup)
+
+**GITHUB** \
+![Github Version](https://img.shields.io/github/package-json/v/developer-sumit/react-native-cli-setup)
+![Github Repo Created At](https://img.shields.io/github/created-at/developer-sumit/react-native-cli-setup)
+![Github Repo Contributors](https://img.shields.io/github/contributors/developer-sumit/react-native-cli-setup)
+![Github Repo Fork](https://img.shields.io/github/forks/developer-sumit/react-native-cli-setup)
+
+**NPM** \
+![NPM Package Version](https://img.shields.io/npm/v/react-native-cli-setup)
+![NPM Package Last Updated](https://img.shields.io/npm/last-update/react-native-cli-setup)
+![NPM Package Downloads](https://img.shields.io/npm/dw/react-native-cli-setup)
 
 `react-native-cli-setup` is a npm package tool to set up a React Native project with some pre-defined configurations. This tool helps you quickly set up a React Native development environment, including installing necessary dependencies like JDK, Android Studio, and the React Native CLI.
 

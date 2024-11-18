@@ -1,6 +1,6 @@
 {
   "name": "react-native-cli-setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
-    "cli-spinners": "^3.2.0",
     "inquirer": "^9.3.7",
     "is-admin": "^4.0.0",
     "ora": "^8.1.1",

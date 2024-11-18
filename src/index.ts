@@ -11,7 +11,6 @@ import chalk from "chalk";
 import sudo from "sudo-prompt";
 import isAdmin from "is-admin";
 import inquirer from "inquirer";
-import cliSpinners from "cli-spinners";
 
 const options = { name: "RN Setup by Sumit Singh Rathore" };
 
@@ -29,7 +28,6 @@ function checkCommand(command: string): boolean {
 async function installChocolatey() {
   const spinner = ora({
     text: chalk.blue("Installing Chocolatey..."),
-    spinner: cliSpinners.dots,
   }).start();
 
   try {
@@ -69,7 +67,6 @@ async function installChocolatey() {
 async function installJDK() {
   const spinner = ora({
     text: chalk.blue("Checking for JDK installation..."),
-    spinner: cliSpinners.dots,
   }).start();
 
   if (process.platform === "win32") {
@@ -121,7 +118,6 @@ async function installJDK() {
 async function installAndroidStudio() {
   const spinner = ora({
     text: chalk.blue("Checking for Android Studio installation..."),
-    spinner: cliSpinners.dots,
   }).start();
 
   const androidStudioPath = path.join(
@@ -215,7 +211,6 @@ async function promptUserForProjectDetails() {
 async function createReactNativeProject(projectName: string, template: string) {
   const spinner = ora({
     text: chalk.blue(`Creating React Native project "${projectName}"...`),
-    spinner: cliSpinners.dots,
   }).start();
 
   const templateOption =

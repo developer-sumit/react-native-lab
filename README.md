@@ -17,14 +17,15 @@
 
 ## Table of Contents
 
-- 🚀 [Features](#features)
-- ⚙️ [Prerequisites](#prerequisites)
-- 🏁 [Getting Started](#getting-started)
-- 🛠️ [Common Issues](#common-issues)
-- 🤝 [Contributing](#contributing)
-- 📜 [License](#license)
+- 🚀 [Features](#🚀-features)
+- ⚙️ [Prerequisites](#⚙️-prerequisites)
+- 🏁 [Getting Started](#🏁-getting-started)
+- 🛠️ [Common Issues](#🛠️-common-issues)
+- 🆘 [Getting Help](#🆘-getting-help)
+- 🤝 [Contributing](#🤝-contributing)
+- 📜 [License](#📜-license)
 
-## Features
+## 🚀 Features
 
 - Installs JDK (OpenJDK)
 - Installs Android Studio
@@ -32,13 +33,13 @@
 - Adds system environment variables - ANDROID_HOME, ANDROID_SDK_ROOT, JAVA_HOME
 - Initializes a new React Native project
 
-## Prerequisites
+## ⚙️ Prerequisites
 
 - Node.js (v14 or higher)
 - npm (v6 or higher)
 - Windows operating system
 
-## Getting Started
+## 🏁 Getting Started
 
 To get started with `react-native-cli-setup`, follow these steps:
 
@@ -48,7 +49,7 @@ To get started with `react-native-cli-setup`, follow these steps:
    npx react-native-cli-setup
    ```
 
-### Common Issues
+## 🛠️ Common Issues
 
 - **Installation Errors**: Ensure you have the correct versions of Node.js and npm installed. Try clearing the npm cache:
   ```sh
@@ -56,7 +57,7 @@ To get started with `react-native-cli-setup`, follow these steps:
   ```
 - **Permission Errors**: Run the command with elevated privileges (e.g., using `sudo` on macOS/Linux or running the terminal as an administrator on Windows).
 
-### Getting Help
+## 🆘 Getting Help
 
 If you need further assistance, you can:
 
@@ -66,7 +67,7 @@ If you need further assistance, you can:
 
 By following these steps, you should be able to resolve most issues and get your React Native project up and running smoothly.
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
 
@@ -81,6 +82,6 @@ To contribute:
 
 Please make sure to follow the project's coding guidelines and standards.
 
-## License
+## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

@@ -4,14 +4,17 @@
 // BUILT-IN MODULES
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 // THIRD-PARTY MODULES
 import ora from "ora";
 import chalk from "chalk";
-import sudo from "sudo-prompt";
 import isAdmin from "is-admin";
 import inquirer from "inquirer";
 
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const options = { name: "RN Setup by Sumit Singh Rathore" };
 
 // Function to check if a command exists
@@ -26,39 +29,46 @@ function checkCommand(command: string): boolean {
 
 // Function to install Chocolatey
 async function installChocolatey() {
-  const spinner = ora({
-    text: chalk.blue("Installing Chocolatey..."),
-  }).start();
+  const spinner = ora({ text: chalk.blue("Installing Chocolatey...") }).start();
 
   try {
-    if (!(await isAdmin())) {
-      spinner.info(chalk.yellow("Requesting administrator privileges..."));
-      await new Promise<void>((resolve, reject) => {
-        sudo.exec(
-          "powershell.exe -Command \"[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))\"",
-          options,
-          (error, stdout, stderr) => {
-            if (error) {
-              spinner.fail(chalk.red("Failed to install Chocolatey."));
-              console.error(error);
-              throw error;
-            } else {
-              spinner.succeed(
-                chalk.green("Chocolatey installed successfully.")
-              );
-            }
-          }
-        );
+    const admin = await isAdmin();
+
+    // Check if Chocolatey is already installed
+    if (checkCommand("choco")) {
+      spinner.succeed(chalk.green("Chocolatey is already installed."));
+      return;
+    }
+
+    if (!admin) {
+      spinner.info(
+        chalk.yellow("Running Chocolatey installation as non-admin...")
+      );
+      const scriptPath = path.join(__dirname, "ChocolateyInstallNonAdmin.ps1"); // Adjust this path as necessary
+
+      // Execute the PowerShell script for non-admin installation
+      execSync(`powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`, {
+        stdio: "inherit",
       });
+      spinner.succeed(
+        chalk.green("Chocolatey installed successfully (non-admin).")
+      );
     } else {
+      // Run the installation command directly if already an admin
+      spinner.info(chalk.yellow("Requesting administrator privileges..."));
       execSync(
-        "powershell.exe -Command \"[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))\"",
+        "powershell.exe -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command \"iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))\"",
         { stdio: "inherit" }
       );
       spinner.succeed(chalk.green("Chocolatey installed successfully."));
     }
+
+    // Add Chocolatey to the current session's PATH
+    const chocoPath = `${process.env.ProgramData}\\chocoportable\\bin`;
+    process.env.PATH = `${process.env.PATH};${chocoPath}`;
   } catch (error) {
     spinner.fail(chalk.red("Failed to install Chocolatey."));
+    console.error(error);
     throw error;
   }
 }
@@ -69,6 +79,7 @@ async function installJDK() {
     text: chalk.blue("Checking for JDK installation..."),
   }).start();
 
+  spinner.stop();
   if (process.platform === "win32") {
     if (!checkCommand("java")) {
       spinner.text = chalk.yellow("JDK not found, installing OpenJDK...");
@@ -128,18 +139,25 @@ async function installAndroidStudio() {
     "studio.exe"
   );
 
+  spinner.stop();
+
   if (process.platform === "win32") {
     if (!fs.existsSync(androidStudioPath)) {
       spinner.text = chalk.yellow("Installing Android Studio...");
       spinner.start();
-      if (!checkCommand("choco")) {
-        await installChocolatey();
-      }
       try {
-        execSync("choco install androidstudio", { stdio: "inherit" });
+        // Path to your PowerShell script
+        const scriptPath = path.join(__dirname, "AndroidStudioInstall.ps1");
+
+        // Run the PowerShell script
+        execSync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`, {
+          stdio: "inherit",
+        });
+
         spinner.succeed(chalk.green("Android Studio installed successfully."));
       } catch (error) {
         spinner.fail(chalk.red("Failed to install Android Studio."));
+        console.error(error);
         throw error;
       }
     } else {
@@ -174,6 +192,7 @@ async function installAndroidStudio() {
           "Failed to set ANDROID_HOME and ANDROID_SDK_ROOT environment variables."
         )
       );
+      console.error(error);
       throw error;
     }
   } else {
@@ -196,12 +215,12 @@ async function promptUserForProjectDetails() {
       validate: (input: string) =>
         input.length > 0 ? true : "Project name cannot be empty.",
     },
-    {
-      type: "list",
-      name: "template",
-      message: "Which template would you like to use?",
-      choices: ["Default", "TypeScript"],
-    },
+    // {
+    //   type: "list",
+    //   name: "template",
+    //   message: "Which template would you like to use?",
+    //   choices: ["Default", "TypeScript"],
+    // },
   ];
 
   return await inquirer.prompt(questions);
@@ -213,18 +232,28 @@ async function createReactNativeProject(projectName: string, template: string) {
     text: chalk.blue(`Creating React Native project "${projectName}"...`),
   }).start();
 
-  const templateOption =
-    template === "TypeScript"
-      ? "--template react-native-template-typescript"
-      : "";
-
   try {
-    execSync(
-      `npx @react-native-community/cli@latest init ${projectName} ${templateOption}`,
-      { stdio: "inherit" }
-    );
+    execSync(`npx @react-native-community/cli@latest init ${projectName}`, {
+      stdio: "inherit",
+    });
     spinner.succeed(
       chalk.green(`Project "${projectName}" created successfully.`)
+    );
+
+    spinner.text = chalk.blue(
+      `Installing dependencies and starting the project...`
+    );
+    // Change directory to the project folder
+    process.chdir(projectName);
+
+    // Install dependencies
+    execSync("npm install", { stdio: "inherit" });
+
+    // Start the project
+    execSync("npm run start", { stdio: "inherit" });
+
+    spinner.succeed(
+      chalk.green(`Dependencies installed and project started successfully.`)
     );
   } catch (error) {
     spinner.fail(chalk.red(`Failed to create project "${projectName}".`));
@@ -238,6 +267,7 @@ export async function setup() {
 
   // Check and install necessary tools
   await installJDK();
+  await installChocolatey();
   await installAndroidStudio();
 
   // Prompt user for project details
@@ -250,7 +280,7 @@ export async function setup() {
 }
 
 // Run the setup function
-setup().catch((error) => {
+setup().catch(async (error) => {
   console.error(error);
   process.exit(1);
 });

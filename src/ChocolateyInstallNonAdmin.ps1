@@ -14,4 +14,4 @@ Set-ExecutionPolicy Bypass -Scope Process -Force;
 iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # Optionally, you can verify the installation by checking the Chocolatey version
-choco --version
+# choco --version

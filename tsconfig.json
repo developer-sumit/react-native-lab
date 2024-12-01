@@ -1,17 +1,19 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext", // or "CommonJS" for CJS
+    "module": "ES2020",
     // Use Node.js module resolution
     "moduleResolution": "node",
     // Adjust based on your output structur
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
     // Generates corresponding '.d.ts' files for TypeScript definitions
-    "declaration": true,
+    // "declaration": true,
     // Directory where declaration files will be placed
-    "declarationDir": "./dist/types",
+    // "declarationDir": "./dist/types",
     // Enables all strict type-checking options
     "strict": true,
+    // Enables strict null checks
+    "resolveJsonModule": true,
     // Enables emit interoperability between CommonJS and ES Modules
     "esModuleInterop": true,
     // Skips type checking of declaration files (can speed up compilation)
@@ -19,6 +21,12 @@
     // Ensures that file names are case-sensitive
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "react-native-lab.ts",
+    "src/prompts.ts",
+    "src/install.ts",
+    "src/helpers/*.ts",
+    "src/scripts/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "templates"]
 }

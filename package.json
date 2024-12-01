@@ -1,31 +1,28 @@
 {
-  "name": "react-native-cli-setup",
-  "version": "1.0.3",
+  "name": "react-native-lab",
+  "version": "1.0.2",
   "type": "module",
-  "main": "./dist/esm/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "bin": {
-    "react-native-cli-setup": "./dist/esm/index.js"
+    "react-native-lab": "./dist/index.js"
   },
   "scripts": {
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "copy:ps1": "cpx src/*.ps1 dist/esm",
-    "build": "npm run clean && npm run build:esm && npm run copy:ps1",
+    "dev": "ncc build ./index.ts -w -o dist/",
+    "release": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register",
     "clean": "rimraf dist",
-    "prepublishOnly": "npm run clean && npm run build",
-    "test": "node --no-warnings --loader ts-node/esm ./src/index.ts"
+    "prepublishOnly": "npm run clean && npm run release",
+    "test": "node dist/index.js"
   },
   "files": [
     "dist"
   ],
   "keywords": [
     "react-native",
-    "cli",
-    "setup",
+    "react-native-lab",
     "react-native-cli",
     "react-native-cli-setup",
-    "react-native-cli-setup"
+    "react-native-community/cli"
   ],
   "author": "Sumit Singh Rathore",
   "license": "MIT",
@@ -34,26 +31,28 @@
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.9.0",
     "@types/yargs": "^17.0.33",
-    "cpx": "^1.5.0",
+    "@vercel/ncc": "^0.38.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "yargs": "^17.7.2"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
+    "ci-info": "^4.1.0",
+    "execa": "^9.5.1",
+    "fast-glob": "^3.3.2",
     "inquirer": "^9.3.7",
-    "is-admin": "^4.0.0",
     "ora": "^8.1.1",
+    "picocolors": "^1.1.1",
     "rimraf": "^6.0.1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/developer-sumit/react-native-cli-setup.git"
-  },
-  "engines": {
-    "node": ">=14"
+    "url": "https://github.com/developer-sumit/react-native-lab.git"
   },
   "bugs": {
-    "url": "https://github.com/developer-sumit/react-native-cli-setup/issues"
+    "url": "https://github.com/developer-sumit/react-native-lab/issues"
+  },
+  "engines": {
+    "node": ">=18.8.0"
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { async as glob } from "fast-glob";
+import glob from "fast-glob";
 import { resolve, dirname, basename, join } from "node:path";
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
 
@@ -41,7 +41,7 @@ export const copyFiles = async (
     throw new TypeError("`src` and `dest` are required");
   }
 
-  const sourceFiles = await glob(source, {
+  const sourceFiles = await glob.glob(source, {
     cwd,
     dot: true,
     absolute: false,

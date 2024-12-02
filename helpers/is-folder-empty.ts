@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { lstatSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { green, blue } from "picocolors";
+import colors from "picocolors";
 
 /**
  * Checks if a folder is empty, considering a predefined list of valid files.
@@ -70,14 +70,14 @@ export default function isFolderEmpty(root: string, name: string): boolean {
 
   if (conflicts.length > 0) {
     console.log(
-      `The directory ${green(name)} contains files that could conflict:`
+      `The directory ${colors.green(name)} contains files that could conflict:`
     );
     console.log();
     for (const file of conflicts) {
       try {
         const stats = lstatSync(join(root, file));
         if (stats.isDirectory()) {
-          console.log(`  ${blue(file)}/`);
+          console.log(`  ${colors.blue(file)}/`);
         } else {
           console.log(`  ${file}`);
         }

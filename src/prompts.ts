@@ -2,10 +2,10 @@
 
 import ora from "ora";
 import inquirer from "inquirer";
-import { blue, green, red, yellow } from "picocolors";
+import colors from "picocolors";
 
-import checkCommand from "./helpers/check-cmd";
-import { checkOS, OS } from "./helpers/check-os";
+import checkCommand from "../helpers/check-cmd";
+import { checkOS, OS } from "../helpers/check-os";
 
 export default async function prompts() {
   const questions = [];
@@ -15,11 +15,13 @@ export default async function prompts() {
 
   if (osName === OS.Windows) {
     // Check if JDK is installed
-    const jdkSpinner = ora(blue("Checking for JDK installation...")).start();
+    const jdkSpinner = ora(
+      colors.blue("Checking for JDK installation...")
+    ).start();
     const isJDKInstalled = checkCommand("java");
     jdkSpinner.stop();
     if (!isJDKInstalled) {
-      jdkSpinner.fail(red("JDK not found."));
+      jdkSpinner.fail(colors.red("JDK not found."));
       questions.push({
         type: "confirm",
         name: "installJDK",
@@ -27,21 +29,21 @@ export default async function prompts() {
         default: true,
       });
     } else {
-      jdkSpinner.succeed(green("JDK is already installed."));
+      jdkSpinner.succeed(colors.green("JDK is already installed."));
     }
   } else {
-    console.log(yellow("Can't check for JDK installation on this OS."));
+    console.log(colors.yellow("Can't check for JDK installation on this OS."));
   }
 
   if (osName === OS.Windows) {
     // Check if Android Studio is installed
     const androidStudioSpinner = ora(
-      blue("Checking for Android Studio installation...")
+      colors.blue("Checking for Android Studio installation...")
     ).start();
     const isAndroidStudioInstalled = checkCommand("studio64.exe");
     androidStudioSpinner.stop();
     if (!isAndroidStudioInstalled) {
-      androidStudioSpinner.fail(red("Android Studio is not installed."));
+      androidStudioSpinner.fail(colors.red("Android Studio is not installed."));
       questions.push({
         type: "confirm",
         name: "installAndroidStudio",
@@ -50,12 +52,12 @@ export default async function prompts() {
       });
     } else {
       androidStudioSpinner.succeed(
-        green("Android Studio is already installed.")
+        colors.green("Android Studio is already installed.")
       );
     }
   } else {
     console.log(
-      yellow("Can't check for Android Studio installation on this OS.")
+      colors.yellow("Can't check for Android Studio installation on this OS.")
     );
   }
 

@@ -2,8 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import prompts from "./src/prompts";
-import retry from "./src/helpers/retry";
-import createReactNative from "./react-native-lab";
+import retry from "./helpers/retry";
+import createReactNative from "./src/react-native-lab";
 import { installJDK, installAndroidStudio } from "./src/install";
 
 /** Main setup function */

@@ -1,33 +1,39 @@
 import fs from "fs";
 import ora from "ora";
 import path from "path";
+import colors from "picocolors";
 import { execSync } from "child_process";
 
-import Scripts from "./scripts";
-import checkCommand from "./helpers/check-cmd";
-import { blue, green, red, yellow } from "picocolors";
+import checkCommand from "../helpers/check-cmd";
+import getScriptPath from "../helpers/get-scripts";
 
 /** Function to install Chocolatey */
 export async function installChocolatey() {
-  const spinner = ora({ text: blue("Installing Chocolatey...") }).start();
+  const spinner = ora({
+    text: colors.blue("Installing Chocolatey..."),
+  }).start();
   try {
     // Check if Chocolatey is already installed
     if (checkCommand("choco")) {
-      spinner.succeed(green("Chocolatey is already installed."));
+      spinner.succeed(colors.green("Chocolatey is already installed."));
       return;
     }
-    spinner.info(yellow("Running Chocolatey installation as non-admin..."));
-    // Execute the PowerShell script for non-admin installation
-    execSync(
-      `powershell.exe -ExecutionPolicy Bypass -File "${Scripts.INSTALL_CHOCOLATELY_AS_NON_ADMIN}"`,
-      { stdio: "inherit" }
+    spinner.info(
+      colors.yellow("Running Chocolatey installation as non-admin...")
     );
-    spinner.succeed(green("Chocolatey installed successfully (non-admin)."));
+    const scriptPath = getScriptPath("installChocolately.ps1");
+    // Execute the PowerShell script for non-admin installation
+    execSync(`powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`, {
+      stdio: "inherit",
+    });
+    spinner.succeed(
+      colors.green("Chocolatey installed successfully (non-admin).")
+    );
     // Add Chocolatey to the current session's PATH
     const chocoPath = `${process.env.ProgramData}\\chocoportable\\bin`;
     process.env.PATH = `${process.env.PATH};${chocoPath}`;
   } catch (error) {
-    spinner.fail(red("Failed to install Chocolatey."));
+    spinner.fail(colors.red("Failed to install Chocolatey."));
     console.error(error);
     throw error;
   }
@@ -36,7 +42,7 @@ export async function installChocolatey() {
 /** Function to install JDK */
 export async function installJDK() {
   const spinner = ora({
-    text: blue("Checking for JDK installation..."),
+    text: colors.blue("Checking for JDK installation..."),
   }).start();
   spinner.stop();
   if (process.platform === "win32") {
@@ -45,9 +51,9 @@ export async function installJDK() {
     }
     try {
       execSync("choco install microsoft-openjdk17", { stdio: "inherit" });
-      spinner.succeed(green("OpenJDK installed successfully."));
+      spinner.succeed(colors.green("OpenJDK installed successfully."));
     } catch (error) {
-      spinner.fail(red("Failed to install OpenJDK."));
+      spinner.fail(colors.red("Failed to install OpenJDK."));
       throw error;
     }
 
@@ -62,16 +68,18 @@ export async function installJDK() {
           stdio: "inherit",
         });
         spinner.succeed(
-          green("JAVA_HOME environment variable set successfully.")
+          colors.green("JAVA_HOME environment variable set successfully.")
         );
       } catch (error) {
-        spinner.fail(red("Failed to set JAVA_HOME environment variable."));
+        spinner.fail(
+          colors.red("Failed to set JAVA_HOME environment variable.")
+        );
         throw error;
       }
     }
   } else {
     spinner.fail(
-      red("Please install OpenJDK manually on non-Windows systems.")
+      colors.red("Please install OpenJDK manually on non-Windows systems.")
     );
   }
 }
@@ -79,7 +87,7 @@ export async function installJDK() {
 /** Function to install Android Studio */
 export async function installAndroidStudio() {
   const spinner = ora({
-    text: blue("Checking for Android Studio installation..."),
+    text: colors.blue("Checking for Android Studio installation..."),
   }).start();
   spinner.stop();
 
@@ -96,26 +104,26 @@ export async function installAndroidStudio() {
 
   if (process.platform === "win32") {
     if (!fs.existsSync(androidStudioPath)) {
-      spinner.text = yellow("Installing Android Studio...");
+      spinner.text = colors.yellow("Installing Android Studio...");
       spinner.start();
       try {
+        const scriptPath = getScriptPath("installAndroidStudio.ps1");
         // Path to your PowerShell script
-        execSync(
-          `powershell -ExecutionPolicy Bypass -File "${Scripts.INSTALL_ANDROID_STUDIO}"`,
-          { stdio: "inherit" }
-        );
-        spinner.succeed(green("Android Studio installed successfully."));
+        execSync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`, {
+          stdio: "inherit",
+        });
+        spinner.succeed(colors.green("Android Studio installed successfully."));
       } catch (error) {
-        spinner.fail(red("Failed to install Android Studio."));
+        spinner.fail(colors.red("Failed to install Android Studio."));
         console.error(error);
         throw error;
       }
     } else {
-      spinner.succeed(green("Android Studio is already installed."));
+      spinner.succeed(colors.green("Android Studio is already installed."));
     }
 
     const pathSpinner = ora({
-      text: blue("Adding Android Studio to PATH..."),
+      text: colors.blue("Adding Android Studio to PATH..."),
     }).start();
     pathSpinner.stop();
 
@@ -128,7 +136,7 @@ export async function installAndroidStudio() {
 
     if (!fs.existsSync(androidHomePath)) {
       pathSpinner.fail(
-        red("Android SDK not found. Please install Android Studio.")
+        colors.red("Android SDK not found. Please install Android Studio.")
       );
       return;
     }
@@ -146,10 +154,12 @@ export async function installAndroidStudio() {
         { stdio: "inherit" }
       );
 
-      pathSpinner.succeed(green("Android Studio added to PATH successfully."));
+      pathSpinner.succeed(
+        colors.green("Android Studio added to PATH successfully.")
+      );
     } catch (error) {
       pathSpinner.fail(
-        red(
+        colors.red(
           "Failed to set ANDROID_HOME and ANDROID_SDK_ROOT environment variables."
         )
       );
@@ -158,7 +168,9 @@ export async function installAndroidStudio() {
     }
   } else {
     spinner.fail(
-      red("Please install Android Studio manually on non-Windows systems.")
+      colors.red(
+        "Please install Android Studio manually on non-Windows systems."
+      )
     );
   }
 }

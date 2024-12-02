@@ -1,19 +1,16 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { green } from "picocolors";
+import colors from "picocolors";
 import { execSync } from "node:child_process";
 import { basename, dirname, join, resolve } from "node:path";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 
-import {
-  getTemplateFile,
-  installTemplate,
-  TemplateType,
-} from "./src/templates";
-import { tryGitInit } from "./src/helpers/git";
-import getOnline from "./src/helpers/is-online";
-import isWriteable from "./src/helpers/is-writable";
-import isFolderEmpty from "./src/helpers/is-folder-empty";
-import { PackageManager } from "./src/helpers/get-pkg-manager";
+import { getTemplateFile, installTemplate } from "./template";
+import { tryGitInit } from "../helpers/git";
+import getOnline from "../helpers/is-online";
+import isWriteable from "../helpers/is-writable";
+import isFolderEmpty from "../helpers/is-folder-empty";
+import { PackageManager } from "../helpers/get-pkg-manager";
+import { TemplateType } from "./types";
 
 export default async function createReactNative({
   appPath,
@@ -62,7 +59,7 @@ export default async function createReactNative({
   }
 
   console.log("");
-  console.log(`Creating a new React Native app in ${green(root)}.`);
+  console.log(`Creating a new React Native app in ${colors.green(root)}.`);
 
   try {
     process.env.APP_NAME = appName;
@@ -115,5 +112,7 @@ export default async function createReactNative({
   }
 
   console.log("\n");
-  console.log(green("🎉 Enjoy your new React Native app! Have fun coding! 🎉"));
+  console.log(
+    colors.green("🎉 Enjoy your new React Native app! Have fun coding! 🎉")
+  );
 }

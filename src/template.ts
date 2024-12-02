@@ -3,13 +3,15 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import { execSync } from "child_process";
-import { bold, cyan, green } from "picocolors";
+import picocolors from "picocolors";
 
 import { copyFiles } from "../helpers/copy";
 import { GetTemplateFileArgs, InstallTemplateArgs } from "./types";
 
+const { bold, cyan, green } = picocolors;
+
 /**
- * Get the file path for a given file in a template, e.g. "next.config.js".
+ * Get the file path for a given file in a template.
  */
 export const getTemplateFile = ({
   template,
@@ -315,5 +317,3 @@ module.exports = {
     process.exit(1);
   }
 };
-
-export * from "./types";

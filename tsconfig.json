@@ -21,12 +21,5 @@
     // Ensures that file names are case-sensitive
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "react-native-lab.ts",
-    "src/prompts.ts",
-    "src/install.ts",
-    "src/helpers/*.ts",
-    "src/scripts/*.ts"
-  ],
   "exclude": ["node_modules", "dist", "templates"]
 }

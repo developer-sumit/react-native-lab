@@ -1,5 +1,7 @@
 <h1 style="text-align: center;">React Native Lab</h1>
 
+![Github License](./images/banner.jpg)
+
 ![Github License](https://img.shields.io/github/license/developer-sumit/react-native-lab)
 
 **GITHUB** \
@@ -70,7 +72,7 @@ To get started with `react-native-lab`, follow these steps:
 1. Ensure you have all the prerequisites installed on your system.
 2. You can use `npx` to run the tool without installing it:
    ```sh
-   npx react-native-lab
+   npx react-native-lab@latest
    ```
 
 <h2 id="common-issues" style="text-align: center;">🛠️ Common Issues</h2>

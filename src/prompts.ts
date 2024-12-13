@@ -67,10 +67,10 @@ export default async function prompts() {
     message: "What is the name of your React Native project?",
     default: "MyReactNativeApp",
     validate: (input: string) => {
-      const isValid = /^[a-zA-Z0-9_-]+$/.test(input);
+      const isValid = /^[a-zA-Z_-]+$/.test(input);
       return isValid
         ? true
-        : "Project name can only contain letters, numbers, underscores, and hyphens.";
+        : "Project name can only contain letters, underscores, and hyphens.";
     },
   });
 

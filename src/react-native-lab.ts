@@ -5,16 +5,18 @@ import { basename, dirname, join, resolve } from "node:path";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 
 import { getTemplateFile, installTemplate } from "./template";
-import { tryGitInit } from "../helpers/git";
-import getOnline from "../helpers/is-online";
-import isWriteable from "../helpers/is-writable";
-import isFolderEmpty from "../helpers/is-folder-empty";
-import { PackageManager } from "../helpers/get-pkg-manager";
+import { tryGitInit } from "./helpers/git";
+import getOnline from "./helpers/is-online";
+import isWriteable from "./helpers/is-writable";
+import isFolderEmpty from "./helpers/is-folder-empty";
+import { PackageManager } from "./helpers/get-pkg-manager";
 import { TemplateType } from "./types";
 
 export default async function createReactNative({
   appPath,
   packageManager,
+  reactNativeVersion,
+  nativeWind,
   srcDir,
   envEnabled,
   disableGit,
@@ -23,7 +25,9 @@ export default async function createReactNative({
 }: {
   appPath: string;
   packageManager: PackageManager;
+  reactNativeVersion: string;
   srcDir: boolean;
+  nativeWind: boolean;
   envEnabled: boolean;
   disableGit?: boolean;
   skipInstall: boolean;
@@ -62,15 +66,8 @@ export default async function createReactNative({
   console.log(`Creating a new React Native app in ${colors.green(root)}.`);
 
   try {
-    process.env.APP_NAME = appName;
-    process.env.PACKAGE_MANAGER = packageManager;
-
-    // execSync(
-    //   `npx @react-native-community/cli@latest init %APP_NAME% --pm %PACKAGE_MANAGER% --skip-git-init --skip-install`,
-    //   { stdio: "inherit" }
-    // );
     execSync(
-      `npx @react-native-community/cli@latest init %APP_NAME% --pm %PACKAGE_MANAGER% --skip-git-init --skip-install`,
+      `npx @react-native-community/cli init ${appName} --pm ${packageManager} --version ${reactNativeVersion} --skip-git-init --skip-install`,
       { stdio: "inherit" }
     );
   } catch (error) {
@@ -84,14 +81,21 @@ export default async function createReactNative({
   // Copy `.gitignore` if the application did not provide one
   const ignorePath = join(root, ".gitignore");
   if (!existsSync(ignorePath)) {
-    copyFileSync(getTemplateFile({ template, file: "gitignore" }), ignorePath);
+    copyFileSync(
+      getTemplateFile({
+        template,
+        mode: nativeWind ? "nativewind" : "default",
+        file: "gitignore",
+      }),
+      ignorePath
+    );
   }
 
   const formattedAppName = appName
     .trim()
     .replace(/([a-z])([A-Z])/g, "$1-$2") // Insert hyphen between lowercase and uppercase letters
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-");
+    .replace(/[^a-z]+/g, "-");
 
   await installTemplate({
     appName: formattedAppName,
@@ -100,6 +104,7 @@ export default async function createReactNative({
     envEnabled,
     template,
     srcDir,
+    nativeWind,
     skipInstall,
   });
 

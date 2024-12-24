@@ -1,6 +1,6 @@
 {
   "name": "react-native-lab",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -8,10 +8,10 @@
     "react-native-lab": "./dist/index.js"
   },
   "scripts": {
-    "build": "node esbuild.config.js",
-    "prepublishOnly": "npm run clean && npm run build",
+    "build": "npm run clean && node esbuild.config.js",
+    "prepublishOnly": "npm run build",
     "clean": "rimraf dist",
-    "test": "node ./dist/index.js"
+    "test": "npm run build && node ./dist/index.js"
   },
   "files": [
     "dist"

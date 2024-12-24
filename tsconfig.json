@@ -21,5 +21,5 @@
     // Ensures that file names are case-sensitive
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["node_modules", "dist", "templates"]
+  "exclude": ["node_modules", "dist", "./src/templates"]
 }

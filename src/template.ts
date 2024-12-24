@@ -5,7 +5,7 @@ import path, { dirname } from "path";
 import { execSync } from "child_process";
 import picocolors from "picocolors";
 
-import { copyFiles } from "../helpers/copy";
+import { copyFiles } from "./helpers/copy";
 import { GetTemplateFileArgs, InstallTemplateArgs } from "./types";
 
 const { bold, cyan, green } = picocolors;
@@ -15,9 +15,10 @@ const { bold, cyan, green } = picocolors;
  */
 export const getTemplateFile = ({
   template,
+  mode,
   file,
 }: GetTemplateFileArgs): string => {
-  return path.join(__dirname, template, file);
+  return path.join(__dirname, template, mode, file);
 };
 
 /**
@@ -32,6 +33,7 @@ export const TEMPLATES = [
   "stack-navigation",
   "drawer-navigation",
 ];
+export const TEMPLATE_MODE = ["default", "nativewind"];
 export const SRC_DIR_NAMES = ["assets", "screens", "components", "helpers"];
 
 /**
@@ -44,6 +46,7 @@ export const installTemplate = async ({
   envEnabled,
   template,
   srcDir,
+  nativeWind,
   skipInstall,
 }: InstallTemplateArgs) => {
   console.log(bold(`Using ${packageManager}.`));
@@ -52,18 +55,23 @@ export const installTemplate = async ({
    * Copy the template files to the target directory.
    */
   console.log(green("\nInitializing project with template:"), template, "\n");
-  const templatePath = path.join(__dirname, "templates", template);
+  const templatePath = path.join(
+    __dirname,
+    "templates",
+    template,
+    nativeWind ? "nativewind" : "default"
+  );
   const copySource = ["**"];
 
   await copyFiles(copySource, root, {
     parents: true,
     cwd: templatePath,
     rename(name) {
-      if (srcDir && name === "App-src.tsx") {
-        return "App.tsx";
-      }
-      if (!srcDir && name === "App.tsx") {
-        return "App.tsx";
+      if (
+        srcDir &&
+        (name === "App-src.tsx" || name === "tailwind-src.config.js")
+      ) {
+        return name.replace("-src", "");
       }
       switch (name) {
         case "gitignore": {
@@ -78,10 +86,13 @@ export const installTemplate = async ({
       }
     },
     filter(name) {
-      if (srcDir && name === "App.tsx") {
-        return false; // Skip copying App.tsx if srcDir is true
+      if (srcDir && (name === "App.tsx" || name === "tailwind.config.js")) {
+        return false; // Skip copying App-src.tsx if srcDir is false
       }
-      if (!srcDir && name === "App-src.tsx") {
+      if (
+        !srcDir &&
+        (name === "App-src.tsx" || name === "tailwind-src.config.js")
+      ) {
         return false; // Skip copying App-src.tsx if srcDir is false
       }
       return true; // Copy all other files
@@ -147,7 +158,9 @@ export const installTemplate = async ({
   const babelConfigPath = path.join(root, "babel.config.js");
   const babelConfig = `
 module.exports = {
-  presets: ["module:@react-native/babel-preset"],
+  presets: ["module:@react-native/babel-preset", ${
+    nativeWind ? `"nativewind/babel"` : ""
+  }],
   plugins: [
   ${
     envEnabled
@@ -232,7 +245,8 @@ module.exports = {
       start: "react-native start",
       reset: "react-native start --reset-cache",
       test: "jest",
-      clean: "node ./scripts/clean.js",
+      clean: "react-native clean",
+      "build:ios": `react-native build-ios --mode "Release"`,
       "build:aab": "react-native build-android --mode=release",
       "build:apk": "react-native run-android -- --mode='release'",
     },
@@ -255,13 +269,28 @@ module.exports = {
     };
   }
 
+  if (nativeWind) {
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
+      nativewind: "^4.1.23",
+      "react-native-reanimated": "^3.16.3",
+      "react-native-safe-area-context": "^4.14.0",
+    };
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
+      tailwindcss: "^3.3.2",
+    };
+  }
+
   if (template.includes("navigation")) {
     packageJson.dependencies = {
       ...packageJson.dependencies,
       "@react-navigation/native": "^7.0.4",
       "react-native-gesture-handler": "^2.21.2",
-      "react-native-reanimated": "^3.16.3",
-      "react-native-safe-area-context": "^4.14.0",
+      "react-native-reanimated":
+        packageJson.dependencies["react-native-reanimated"] || "^3.16.3",
+      "react-native-safe-area-context":
+        packageJson.dependencies["react-native-safe-area-context"] || "^4.14.0",
       "react-native-screens": "^4.3.0",
     };
   }
@@ -311,7 +340,13 @@ module.exports = {
 
   // Install dependencies
   try {
-    execSync(`${packageManager} install`, { stdio: "inherit" });
+    if (packageManager === "yarn") {
+      execSync("yarn install --force", { stdio: "inherit" });
+    } else if (packageManager === "npm") {
+      execSync("npm install --legacy-peer-deps", { stdio: "inherit" });
+    } else if (packageManager === "bun") {
+      execSync("bun install", { stdio: "inherit" });
+    }
   } catch (error) {
     console.error("Failed to install dependencies:", error);
     process.exit(1);

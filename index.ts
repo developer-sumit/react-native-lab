@@ -2,9 +2,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import prompts from "./src/prompts";
-import retry from "./helpers/retry";
+import retry from "./src/helpers/retry";
 import createReactNative from "./src/react-native-lab";
-import { installJDK, installAndroidStudio } from "./src/install";
+import { installJDK, installAndroidStudio } from "./src/install-scripts";
 
 /** Main setup function */
 async function setup() {
@@ -22,7 +22,12 @@ async function setup() {
   await createReactNative({
     appPath: prompt.projectName,
     packageManager: prompt.packageManager,
+    reactNativeVersion:
+      prompt.reactNativeVersion === "custom"
+        ? prompt.customReactNativeVersion
+        : prompt.reactNativeVersion,
     srcDir: prompt.srcDir,
+    nativeWind: prompt.installNativeWind,
     envEnabled: prompt.envEnabled,
     template: prompt.template,
     disableGit: prompt.disableGit,

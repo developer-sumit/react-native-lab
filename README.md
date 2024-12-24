@@ -36,33 +36,36 @@ This project is inspired by the simplicity and effectiveness of [create-next-app
 - **Installs Android Studio**: Sets up Android Studio, including the necessary SDKs and tools.
 - **Sets Environment Variables**: Configures system environment variables such as `ANDROID_HOME`, `ANDROID_SDK_ROOT`, and `JAVA_HOME`.
 - **Pre-built Templates**: Choose from a variety of pre-built templates to kickstart your React Native project.
-- **Customizable Configuration**: Allows you to customize the project setup according to your preferences.
-- **Cross-Platform Support**: Works on Windows, macOS, and Linux.
-- **Environment Setup**: Optionally sets up a `.env` file for managing environment variables.
-- **Navigation Setup**: Optionally sets up React Navigation in your project.
+  - `Blank`
+  - `Bottom Navigation`
+  - `Drawer Navigation`
+  - `Stack Navigation`
+- **Project Structure**: Creates an `src` folder for you.
+- **Cross-Platform Support**: Works on `Windows`, `macOS`, and `Linux`.
+- **Environment Setup**: Sets up a `.env` file for managing environment variables.
+- **Navigation Setup**: Sets up React Navigation in your project.
 - **Alias Configuration**: Configures path aliases for cleaner and more manageable imports.
+- **NativeWind Integration**: Install and configure NativeWind for styling.
+- **React Native Version Selection**: Allows you to set up the project with your preferred React Native version.
 
 <h2 id="screenshots" style="text-align: center;">📸 Screenshots</h2>
 
 Here are the available templates you can use with `react-native-lab`:
 
-![Setup](./images/setup-1.png)
-![Setup](./images/setup-2.png)
-
-<div style="display: flex; gap: 20px;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
   <div style="text-align: center;">
     <h4>Blank Template</h4>
-    <img src="./images/blank-template.png" alt="Blank Template" style="width: 300px; border-radius: 10px;">
+    <img src="./images/blank-template.png" alt="Blank Template" style="width: 100%; border-radius: 10px;">
   </div>
   <div style="text-align: center;">
     <h4>Navigation Template</h4>
-    <img src="./images/navigation-template.png" alt="Navigation Template" style="width: 300px; border-radius: 10px;">
+    <img src="./images/navigation-template.png" alt="Navigation Template" style="width: 100%; border-radius: 10px;">
   </div>
 </div>
 
 <h2 id="prerequisites" style="text-align: center;">⚙️ Prerequisites</h2>
 
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - npm (v6 or higher)
 
 <h2 id="getting-started" style="text-align: center;">🏁 Getting Started</h2>
@@ -111,3 +114,7 @@ Please make sure to follow the project's coding guidelines and standards.
 <h2 id="license" style="text-align: center;">📜 License</h2>
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+<h2 id="changelog" style="text-align: center;">📜 Changelog</h2>
+
+For a detailed list of changes and updates, please refer to the [Changelog](./CHANGELOG.md).

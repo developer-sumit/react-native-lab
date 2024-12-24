@@ -24,10 +24,10 @@ function copyFiles(src, dest) {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const templateSource = path.resolve(__dirname, "templates");
+const templateSource = path.resolve(__dirname, "./src/templates");
 const templateDest = path.resolve(__dirname, "dist", "templates");
 
-const scriptSource = path.resolve(__dirname, "scripts");
+const scriptSource = path.resolve(__dirname, "./src/scripts");
 const scriptDist = path.resolve(__dirname, "dist", "scripts");
 
 build({

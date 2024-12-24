@@ -1,11 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import ora from "ora";
-import inquirer from "inquirer";
 import colors from "picocolors";
+import inquirer, { Answers } from "inquirer";
 
-import checkCommand from "../helpers/check-cmd";
-import { checkOS, OS } from "../helpers/check-os";
+import checkCommand from "./helpers/check-cmd";
+import checkOS, { OS } from "./helpers/check-os";
 
 export default async function prompts() {
   const questions = [];
@@ -13,7 +13,7 @@ export default async function prompts() {
   // Check the operating system
   const osName = checkOS();
 
-  if (osName === OS.Windows) {
+  if (osName === OS.Windows || osName === OS.Linux) {
     // Check if JDK is installed
     const jdkSpinner = ora(
       colors.blue("Checking for JDK installation...")
@@ -35,12 +35,15 @@ export default async function prompts() {
     console.log(colors.yellow("Can't check for JDK installation on this OS."));
   }
 
-  if (osName === OS.Windows) {
+  if (osName === OS.Windows || osName === OS.Linux) {
     // Check if Android Studio is installed
     const androidStudioSpinner = ora(
       colors.blue("Checking for Android Studio installation...")
     ).start();
-    const isAndroidStudioInstalled = checkCommand("studio64.exe");
+    const isAndroidStudioInstalled =
+      osName === OS.Windows
+        ? checkCommand("studio64.exe")
+        : checkCommand("studio.sh");
     androidStudioSpinner.stop();
     if (!isAndroidStudioInstalled) {
       androidStudioSpinner.fail(colors.red("Android Studio is not installed."));
@@ -100,12 +103,15 @@ export default async function prompts() {
       { name: "Bottom Tab Navigation", value: "bottom-navigation" },
       { name: "Stack Navigation", value: "stack-navigation" },
       { name: "Drawer Navigation", value: "drawer-navigation" },
-      // These are not supported yet
-      // { name: "Firebase", value: "firebase" },
-      // { name: "Redux", value: "redux" },
-      // { name: "GraphQL", value: "graphql" },
     ],
     default: "blank",
+  });
+
+  questions.push({
+    type: "confirm",
+    name: "installNativeWind",
+    message: "Would you like to install NativeWind for styling?",
+    default: false,
   });
 
   questions.push({
@@ -113,6 +119,30 @@ export default async function prompts() {
     name: "envEnabled",
     message: "Do you want to set up a .env file for environment variables?",
     default: false,
+  });
+
+  questions.push({
+    type: "list",
+    name: "reactNativeVersion",
+    message: "Which React Native version would you like to use?",
+    choices: [
+      { name: "Latest", value: "latest" },
+      { name: "0.75.2", value: "0.75.2" },
+      { name: "0.74.6", value: "0.74.6" },
+      { name: "Custom", value: "custom" },
+    ],
+    default: "latest",
+  });
+
+  questions.push({
+    type: "input",
+    name: "customReactNativeVersion",
+    message: "Please enter the React Native version you would like to use:",
+    when: (answers: Answers) => answers.reactNativeVersion === "custom",
+    validate: (input: string) => {
+      const isValid = /^\d+\.\d+\.\d+$/.test(input);
+      return isValid ? true : "Please enter a valid version number.";
+    },
   });
 
   return await inquirer.prompt(questions);

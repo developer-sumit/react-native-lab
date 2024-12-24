@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: ./.github/actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: ./.github/actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: "14" # Specify the Node.js version you want to use
+          node-version: '20.x'
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies

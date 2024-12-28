@@ -44,6 +44,7 @@ export const installTemplate = async ({
   root,
   packageManager,
   envEnabled,
+  envLibrary,
   template,
   srcDir,
   nativeWind,
@@ -152,6 +153,9 @@ export const installTemplate = async ({
     }
   }
 
+  const isDotenv = envEnabled && envLibrary === "react-native-dotenv";
+  const isReactNativeConfig = envEnabled && envLibrary === "react-native-config";
+
   /**
    * Replace code in babel.config.js with custom import alias code.
    */
@@ -163,7 +167,7 @@ module.exports = {
   }],
   plugins: [
   ${
-    envEnabled
+    isDotenv
       ? `[
       "module:react-native-dotenv",
       {
@@ -262,10 +266,17 @@ module.exports = {
     },
   };
 
-  if (envEnabled) {
+  if (isDotenv) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
       "react-native-dotenv": "^3.4.11",
+    };
+  }
+
+  if (isReactNativeConfig) {
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
+      "react-native-config": "^1.5.3",
     };
   }
 

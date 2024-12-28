@@ -48,6 +48,11 @@ export interface InstallTemplateArgs {
   envEnabled: boolean;
 
   /**
+   * Which library to use for env variables
+   */
+  envLibrary: string;
+
+  /**
    * The template to install
    */
   template: TemplateType;

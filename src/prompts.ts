@@ -123,6 +123,17 @@ export default async function prompts() {
 
   questions.push({
     type: "list",
+    name: "envLibrary",
+    message: "Please choose the library you would like to use for environment variables:",
+    when: (answers: Answers) => Boolean(answers.envEnabled),
+    choices: [
+      { name: "React Native Config", value: "react-native-config" },
+      { name: "React Native Dotenv", value: "react-native-dotenv" },
+    ],
+  });
+
+  questions.push({
+    type: "list",
     name: "reactNativeVersion",
     message: "Which React Native version would you like to use?",
     choices: [

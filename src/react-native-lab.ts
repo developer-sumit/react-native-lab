@@ -19,6 +19,7 @@ export default async function createReactNative({
   nativeWind,
   srcDir,
   envEnabled,
+  envLibrary,
   disableGit,
   skipInstall,
   template,
@@ -29,6 +30,7 @@ export default async function createReactNative({
   srcDir: boolean;
   nativeWind: boolean;
   envEnabled: boolean;
+  envLibrary: string;
   disableGit?: boolean;
   skipInstall: boolean;
   template: TemplateType;
@@ -102,6 +104,7 @@ export default async function createReactNative({
     root,
     packageManager,
     envEnabled,
+    envLibrary,
     template,
     srcDir,
     nativeWind,

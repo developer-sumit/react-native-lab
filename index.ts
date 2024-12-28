@@ -29,6 +29,7 @@ async function setup() {
     srcDir: prompt.srcDir,
     nativeWind: prompt.installNativeWind,
     envEnabled: prompt.envEnabled,
+    envLibrary: prompt.envLibrary,
     template: prompt.template,
     disableGit: prompt.disableGit,
     skipInstall: false,

@@ -10,7 +10,7 @@ import getOnline from "./helpers/is-online";
 import isWriteable from "./helpers/is-writable";
 import isFolderEmpty from "./helpers/is-folder-empty";
 import { PackageManager } from "./helpers/get-pkg-manager";
-import { TemplateType } from "./types";
+import { EnvPackages, TemplateType } from "./types";
 
 export default async function createReactNative({
   appPath,
@@ -19,6 +19,10 @@ export default async function createReactNative({
   nativeWind,
   srcDir,
   envEnabled,
+  envPackage,
+  includeCustomHooks,
+  customHooks,
+  includeConsoleRemover,
   disableGit,
   skipInstall,
   template,
@@ -29,6 +33,10 @@ export default async function createReactNative({
   srcDir: boolean;
   nativeWind: boolean;
   envEnabled: boolean;
+  envPackage: EnvPackages;
+  includeCustomHooks: boolean;
+  customHooks: string[];
+  includeConsoleRemover: boolean;
   disableGit?: boolean;
   skipInstall: boolean;
   template: TemplateType;
@@ -102,22 +110,23 @@ export default async function createReactNative({
     root,
     packageManager,
     envEnabled,
+    envPackage,
+    includeCustomHooks,
+    customHooks,
+    includeConsoleRemover,
     template,
     srcDir,
-    nativeWind,
+    nativeWind, 
     skipInstall,
   });
 
   if (disableGit) {
     console.log("Skipping git initialization.");
-    console.log();
   } else if (tryGitInit(root)) {
     console.log("Initialized a git repository.");
-    console.log();
   }
 
-  console.log("\n");
   console.log(
-    colors.green("🎉 Enjoy your new React Native app! Have fun coding! 🎉")
+    colors.green("\n🎉 Enjoy your new React Native app! Have fun coding! 🎉")
   );
 }

@@ -8,6 +8,8 @@ export type TemplateType =
 
 export type TemplateMode = "default" | "nativewind";
 
+export type EnvPackages = "react-native-config" | "react-native-dotenv";
+
 export interface GetTemplateFileArgs {
   /**
    * The template to get the file for
@@ -46,6 +48,26 @@ export interface InstallTemplateArgs {
    * Whether to enable env variables
    */
   envEnabled: boolean;
+
+  /**
+   * The package to use for env variables
+   */
+  envPackage: EnvPackages;
+
+  /**
+   * Whether to include custom hooks
+   */
+  includeCustomHooks: boolean;
+
+  /**
+   * The custom hooks to include
+   */
+  customHooks: string[];
+
+  /**
+   * Whether to include the console remover
+   */
+  includeConsoleRemover: boolean;
 
   /**
    * The template to install

@@ -1,100 +1,52 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 import ora from "ora";
 import colors from "picocolors";
 import inquirer, { Answers } from "inquirer";
-
 import checkCommand from "./helpers/check-cmd";
 import checkOS, { OS } from "./helpers/check-os";
 
-export default async function prompts() {
-  const questions = [];
+const { blue, red, green, yellow } = colors;
 
-  // Check the operating system
-  const osName = checkOS();
+const checkInstallation = async (name: string, command: string) => {
+  const spinner = ora(blue(`Checking for ${name} installation...`)).start();
+  const isInstalled = checkCommand(command);
+  spinner.stop();
 
-  if (osName === OS.Windows || osName === OS.Linux) {
-    // Check if JDK is installed
-    const jdkSpinner = ora(
-      colors.blue("Checking for JDK installation...")
-    ).start();
-    const isJDKInstalled = checkCommand("java");
-    jdkSpinner.stop();
-    if (!isJDKInstalled) {
-      jdkSpinner.fail(colors.red("JDK not found."));
-      questions.push({
-        type: "confirm",
-        name: "installJDK",
-        message: "Would you like to install OpenJDK?",
-        default: true,
-      });
-    } else {
-      jdkSpinner.succeed(colors.green("JDK is already installed."));
-    }
-  } else {
-    console.log(colors.yellow("Can't check for JDK installation on this OS."));
+  if (!isInstalled) {
+    spinner.fail(red(`${name} not found.`));
+    return {
+      type: "confirm",
+      name: `install${name.replace(/\s/g, "")}`,
+      message: `Would you like to install ${name}?`,
+      default: true,
+    };
   }
 
-  if (osName === OS.Windows || osName === OS.Linux) {
-    // Check if Android Studio is installed
-    const androidStudioSpinner = ora(
-      colors.blue("Checking for Android Studio installation...")
-    ).start();
-    const isAndroidStudioInstalled =
-      osName === OS.Windows
-        ? checkCommand("studio64.exe")
-        : checkCommand("studio.sh");
-    androidStudioSpinner.stop();
-    if (!isAndroidStudioInstalled) {
-      androidStudioSpinner.fail(colors.red("Android Studio is not installed."));
-      questions.push({
-        type: "confirm",
-        name: "installAndroidStudio",
-        message: "Would you like to install it?",
-        default: true,
-      });
-    } else {
-      androidStudioSpinner.succeed(
-        colors.green("Android Studio is already installed.")
-      );
-    }
-  } else {
-    console.log(
-      colors.yellow("Can't check for Android Studio installation on this OS.")
-    );
-  }
+  spinner.succeed(green(`${name} is already installed.`));
+  return null;
+};
 
-  // Always ask for project name
-  questions.push({
+const questions = [
+  {
     name: "projectName",
     message: "What is the name of your React Native project?",
     default: "MyReactNativeApp",
-    validate: (input: string) => {
-      const isValid = /^[a-zA-Z_-]+$/.test(input);
-      return isValid
-        ? true
-        : "Project name can only contain letters, underscores, and hyphens.";
-    },
-  });
-
-  // Always ask for package manager
-  questions.push({
+    validate: (input: string) =>
+      /^[a-zA-Z_-]+$/.test(input) ||
+      "Project name can only contain letters, underscores, and hyphens.",
+  },
+  {
     type: "list",
     name: "packageManager",
     message: "Which package manager would you like to use?",
-    choices: ["npm", "yarn", "bun"], // pnpm and Deno are not supported
-  });
-
-  // Always ask for src folder
-  questions.push({
+    choices: ["npm", "yarn", "bun"],
+  },
+  {
     type: "confirm",
     name: "srcDir",
     message: 'Do you want to create a "src" folder for your files?',
     default: true,
-  });
-
-  // Always ask for template
-  questions.push({
+  },
+  {
     type: "list",
     name: "template",
     message: "Which template would you like to use for your project?",
@@ -105,23 +57,53 @@ export default async function prompts() {
       { name: "Drawer Navigation", value: "drawer-navigation" },
     ],
     default: "blank",
-  });
-
-  questions.push({
+  },
+  {
     type: "confirm",
     name: "installNativeWind",
     message: "Would you like to install NativeWind for styling?",
     default: false,
-  });
-
-  questions.push({
+  },
+  {
     type: "confirm",
     name: "envEnabled",
     message: "Do you want to set up a .env file for environment variables?",
     default: false,
-  });
-
-  questions.push({
+  },
+  {
+    type: "list",
+    name: "envPackage",
+    message: "Which package would you like to use for environment variables?",
+    choices: ["react-native-config", "react-native-dotenv"],
+    when: (answers: Answers) => answers.envEnabled,
+  },
+  {
+    type: "confirm",
+    name: "includeCustomHooks",
+    message: "Would you like to include custom hooks in your project?",
+    default: false,
+  },
+  {
+    type: "checkbox",
+    name: "selectedHooks",
+    message: "Select the custom hooks you want to include:",
+    choices: [
+      { name: "useDebounce", value: "useDebounce" },
+      { name: "useThrottle", value: "useThrottle" },
+      { name: "usePrevious", value: "usePrevious" },
+      { name: "useOrientation", value: "useOrientation" },
+      { name: "useResponsiveLayout", value: "useResponsiveLayout" },
+    ],
+    when: (answers: Answers) => answers.includeCustomHooks,
+  },
+  {
+    type: "confirm",
+    name: "includeConsoleRemover",
+    message:
+      "Would you like to include automatic console log removal for production builds?",
+    default: false,
+  },
+  {
     type: "list",
     name: "reactNativeVersion",
     message: "Which React Native version would you like to use?",
@@ -132,18 +114,52 @@ export default async function prompts() {
       { name: "Custom", value: "custom" },
     ],
     default: "latest",
-  });
-
-  questions.push({
+  },
+  {
     type: "input",
     name: "customReactNativeVersion",
     message: "Please enter the React Native version you would like to use:",
     when: (answers: Answers) => answers.reactNativeVersion === "custom",
-    validate: (input: string) => {
-      const isValid = /^\d+\.\d+\.\d+$/.test(input);
-      return isValid ? true : "Please enter a valid version number.";
-    },
-  });
+    validate: (input: string) =>
+      /^\d+\.\d+\.\d+$/.test(input) || "Please enter a valid version number.",
+  },
+];
 
-  return await inquirer.prompt(questions);
+export default async function prompts() {
+  const osName = checkOS();
+  const dynamicQuestions = [];
+
+  if (osName === OS.Windows || osName === OS.Linux) {
+    const jdkQuestion = await checkInstallation("JDK", "java");
+    if (jdkQuestion) dynamicQuestions.push(jdkQuestion);
+
+    const androidStudioCommand =
+      osName === OS.Windows ? "studio64.exe" : "studio.sh";
+    const androidStudioQuestion = await checkInstallation(
+      "Android Studio",
+      androidStudioCommand
+    );
+    if (androidStudioQuestion) dynamicQuestions.push(androidStudioQuestion);
+  } else {
+    console.log(
+      yellow("Can't check for JDK and Android Studio installation on this OS.")
+    );
+  }
+
+  const answers = await inquirer.prompt([...dynamicQuestions, ...questions]);
+
+  if (answers.includeConsoleRemover) {
+    console.log(yellow("\nConsole log removal feature included:"));
+    console.log(
+      green("- Automatically removes all console logs in production builds")
+    );
+    console.log("  This improves security and slightly reduces app size");
+    console.log(
+      yellow(
+        "\nThis feature will be added to your project via a ConsoleRemover component."
+      )
+    );
+  }
+
+  return answers;
 }

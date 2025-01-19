@@ -31,14 +31,8 @@ const questions = [
     message: "What is the name of your React Native project?",
     default: "MyReactNativeApp",
     validate: (input: string) =>
-      /^[a-zA-Z_-]+$/.test(input) ||
+      /^[a-zA-Z0-9_]+$/.test(input) ||
       "Project name can only contain letters, underscores, and hyphens.",
-  },
-  {
-    type: "list",
-    name: "packageManager",
-    message: "Which package manager would you like to use?",
-    choices: ["npm", "yarn", "bun"],
   },
   {
     type: "confirm",
@@ -79,9 +73,23 @@ const questions = [
   },
   {
     type: "confirm",
+    name: "enableAdditionalCustomization",
+    message: "Would you like to enable additional customization?",
+    default: false,
+  },
+  {
+    type: "list",
+    name: "packageManager",
+    message: "Which package manager would you like to use?",
+    choices: ["npm", "yarn", "bun"],
+    when: (answers: Answers) => answers.enableAdditionalCustomization,
+  },
+  {
+    type: "confirm",
     name: "includeCustomHooks",
     message: "Would you like to include custom hooks in your project?",
     default: false,
+    when: (answers: Answers) => answers.enableAdditionalCustomization,
   },
   {
     type: "checkbox",
@@ -94,7 +102,8 @@ const questions = [
       { name: "useOrientation", value: "useOrientation" },
       { name: "useResponsiveLayout", value: "useResponsiveLayout" },
     ],
-    when: (answers: Answers) => answers.includeCustomHooks,
+    when: (answers: Answers) =>
+      answers.includeCustomHooks && answers.enableAdditionalCustomization,
   },
   {
     type: "confirm",
@@ -102,6 +111,7 @@ const questions = [
     message:
       "Would you like to include automatic console log removal for production builds?",
     default: false,
+    when: (answers: Answers) => answers.enableAdditionalCustomization,
   },
   {
     type: "list",
@@ -114,12 +124,15 @@ const questions = [
       { name: "Custom", value: "custom" },
     ],
     default: "latest",
+    when: (answers: Answers) => answers.enableAdditionalCustomization,
   },
   {
     type: "input",
     name: "customReactNativeVersion",
     message: "Please enter the React Native version you would like to use:",
-    when: (answers: Answers) => answers.reactNativeVersion === "custom",
+    when: (answers: Answers) =>
+      answers.reactNativeVersion === "custom" &&
+      answers.enableAdditionalCustomization,
     validate: (input: string) =>
       /^\d+\.\d+\.\d+$/.test(input) || "Please enter a valid version number.",
   },

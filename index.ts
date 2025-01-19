@@ -21,18 +21,22 @@ async function setup() {
   // Create the React Native project with user inputs
   await createReactNative({
     appPath: prompt.projectName,
-    packageManager: prompt.packageManager,
+    packageManager: prompt.packageManager ? prompt.packageManager : "npm",
     reactNativeVersion:
       prompt.reactNativeVersion === "custom"
         ? prompt.customReactNativeVersion
-        : prompt.reactNativeVersion,
+        : prompt.reactNativeVersion || "latest",
     srcDir: prompt.srcDir,
     nativeWind: prompt.installNativeWind,
-    envEnabled: prompt.envEnabled,
+    envEnabled: prompt.envEnabled ? prompt.envEnabled : false,
     envPackage: prompt.envPackage ? prompt.envPackage : "react-native-config",
-    includeCustomHooks: prompt.includeCustomHooks,
-    customHooks: prompt.selectedHooks,
-    includeConsoleRemover: prompt.includeConsoleRemover,
+    includeCustomHooks: prompt.includeCustomHooks
+      ? prompt.includeCustomHooks
+      : false,
+    customHooks: prompt.selectedHooks ? prompt.selectedHooks : [],
+    includeConsoleRemover: prompt.includeConsoleRemover
+      ? prompt.includeConsoleRemover
+      : false,
     template: prompt.template,
     disableGit: prompt.disableGit,
     skipInstall: false,

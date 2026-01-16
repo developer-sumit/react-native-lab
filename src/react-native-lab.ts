@@ -11,7 +11,7 @@ import getOnline from "./helpers/is-online";
 import isWriteable from "./helpers/is-writable";
 import isFolderEmpty from "./helpers/is-folder-empty";
 import { PackageManager } from "./helpers/get-pkg-manager";
-import { EnvPackages, TemplateType } from "./types";
+import { EnvPackages, TemplateType, StateManagementType } from "./types";
 import { setupCI as initCI } from "./helpers/ci";
 
 function fixAndroidPackageStructure(root: string, packageName: string) {
@@ -93,6 +93,7 @@ export default async function createReactNative({
   skipInstall,
   template,
   setupCI,
+  stateManagement,
 }: {
   appPath: string;
   packageManager: PackageManager;
@@ -109,6 +110,7 @@ export default async function createReactNative({
   skipInstall: boolean;
   template: TemplateType;
   setupCI?: boolean;
+  stateManagement?: StateManagementType;
 }) {
   const root = resolve(appPath);
 
@@ -194,6 +196,7 @@ export default async function createReactNative({
     srcDir,
     nativeWind,
     skipInstall,
+    stateManagement,
   });
 
   if (disableGit) {

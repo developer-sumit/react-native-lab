@@ -14,7 +14,7 @@ import checkCommand from "./helpers/check-cmd";
 import checkOS, { OS } from "./helpers/check-os";
 import { fetchReactNativeVersions } from "./helpers/fetch-rn-versions";
 import { PackageManager } from "./helpers/get-pkg-manager";
-import { TemplateType, EnvPackages } from "./types";
+import { TemplateType, EnvPackages, StateManagementType } from "./types";
 
 const { blue, red, green } = colors;
 
@@ -42,6 +42,7 @@ export interface PromptResult {
   reactNativeVersion: string;
   disableGit?: boolean;
   setupCI?: boolean;
+  stateManagement?: StateManagementType;
 }
 
 export default async function prompts(): Promise<PromptResult> {
@@ -140,6 +141,7 @@ export default async function prompts(): Promise<PromptResult> {
   let packageName: string | undefined;
   let reactNativeVersion = "latest";
   let installNativeWind = false;
+  let stateManagement: StateManagementType = "none";
   let envEnabled = false;
   let envPackage: EnvPackages = "react-native-config";
   let includeCustomHooks = false;
@@ -215,6 +217,27 @@ export default async function prompts(): Promise<PromptResult> {
     });
     handleCancel(wind);
     installNativeWind = wind as boolean;
+
+    // State Management
+    const sm = await select({
+      message: "Which state management library would you like to use?",
+      options: [
+        {
+          value: "none",
+          label: "None (React Context)",
+          hint: "Simple built-in state management",
+        },
+        {
+          value: "zustand",
+          label: "Zustand",
+          hint: "Small, fast and scalable",
+        },
+        // { value: "redux-toolkit", label: "Redux Toolkit", hint: "Opinionated Redux toolset" }, // Planned for later
+      ],
+      initialValue: "none",
+    });
+    handleCancel(sm);
+    stateManagement = sm as StateManagementType;
 
     // Env Vars
     const env = await confirm({
@@ -309,5 +332,6 @@ export default async function prompts(): Promise<PromptResult> {
     reactNativeVersion,
     disableGit: !initGit,
     setupCI,
+    stateManagement,
   };
 }

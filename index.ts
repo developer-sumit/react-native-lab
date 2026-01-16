@@ -47,6 +47,7 @@ async function setup() {
     template: prompt.template,
     disableGit: prompt.disableGit,
     setupCI: prompt.setupCI,
+    stateManagement: prompt.stateManagement,
     skipInstall: false,
   });
 }

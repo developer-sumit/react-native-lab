@@ -71,6 +71,7 @@ program
       reactNativeVersion: "latest",
       disableGit: true,
       setupCI: true,
+      stateManagement: "zustand",
     };
 
     const env = {

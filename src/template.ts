@@ -5,7 +5,12 @@ import path, { dirname } from "path";
 import picocolors from "picocolors";
 import { copyFiles } from "./helpers/copy";
 import HookTemplates from "./templates/snippets/hooks";
-import { GetTemplateFileArgs, InstallTemplateArgs } from "./types";
+import { StateManagementTemplates } from "./templates/snippets/store";
+import {
+  GetTemplateFileArgs,
+  InstallTemplateArgs,
+  StateManagementType,
+} from "./types";
 
 const { bold, cyan, green } = picocolors;
 
@@ -41,6 +46,7 @@ export const installTemplate = async ({
   template,
   srcDir,
   nativeWind,
+  stateManagement,
 }: InstallTemplateArgs) => {
   console.log(bold(`Using ${packageManager}.`));
   const isReactNativeDotEnv =
@@ -54,7 +60,7 @@ export const installTemplate = async ({
     "templates",
     "project",
     template,
-    nativeWind ? "nativewind" : "default"
+    nativeWind ? "nativewind" : "default",
   );
 
   await copyFiles(["**"], root, {
@@ -89,8 +95,8 @@ export const installTemplate = async ({
           .rename(path.join(root, file), path.join(root, "src", file))
           .catch((err) => {
             if (err.code !== "ENOENT") throw err;
-          })
-      )
+          }),
+      ),
     );
   }
 
@@ -103,7 +109,7 @@ export const installTemplate = async ({
     nativeWind,
     srcDir,
     template,
-    includeConsoleRemover
+    includeConsoleRemover,
   );
   await fs.writeFile(path.join(root, "babel.config.js"), babelConfig, "utf8");
 
@@ -111,8 +117,10 @@ export const installTemplate = async ({
   const tsConfig = generateTsConfig(srcDir, template);
   await fs.writeFile(
     path.join(root, "tsconfig.json"),
-    JSON.stringify(tsConfig, null, 2) + os.EOL
-  );  // Update package.json
+    JSON.stringify(tsConfig, null, 2) + os.EOL,
+  );
+
+  // Update package.json
   const packageJson = await updatePackageJson(
     root,
     appName,
@@ -120,8 +128,19 @@ export const installTemplate = async ({
     isReactNativeConfig,
     nativeWind,
     template,
-    includeConsoleRemover
+    includeConsoleRemover,
+    stateManagement,
   );
+
+  // Add state management
+  if (stateManagement && stateManagement === "zustand") {
+    const storeDir = path.join(root, srcDir ? "src/store" : "store");
+    await fs.mkdir(storeDir, { recursive: true });
+    await fs.writeFile(
+      path.join(storeDir, "useStore.ts"),
+      StateManagementTemplates.zustand,
+    );
+  }
   // Add custom hooks
   if (includeCustomHooks && customHooks.length > 0) {
     const hooksDir = path.join(root, srcDir ? "src/hooks" : "hooks");
@@ -129,7 +148,7 @@ export const installTemplate = async ({
     for (const hook of customHooks) {
       await fs.writeFile(
         path.join(hooksDir, `${hook}.ts`),
-        HookTemplates[hook as keyof typeof HookTemplates]
+        HookTemplates[hook as keyof typeof HookTemplates],
       );
     }
     // console.log(green("Custom Hooks added successfully."));
@@ -138,12 +157,12 @@ export const installTemplate = async ({
   // Install dependencies
   console.log("\nDependencies:");
   Object.keys(packageJson.dependencies).forEach((dep) =>
-    console.log(`- ${cyan(dep)}`)
+    console.log(`- ${cyan(dep)}`),
   );
   if (packageJson.devDependencies) {
     console.log("\nDev Dependencies:");
     Object.keys(packageJson.devDependencies).forEach((dep) =>
-      console.log(`- ${cyan(dep)}`)
+      console.log(`- ${cyan(dep)}`),
     );
   }
 
@@ -162,12 +181,12 @@ async function replaceFile(
   root: string,
   templatePath: string,
   fileName: string,
-  srcDir: boolean = false
+  srcDir: boolean = false,
 ) {
   const filePath = path.join(root, fileName);
   const templateFilePath = path.join(
     templatePath,
-    srcDir ? `${fileName.replace(".", "-src.")}` : fileName
+    srcDir ? `${fileName.replace(".", "-src.")}` : fileName,
   );
   try {
     await fs.access(templateFilePath);
@@ -186,7 +205,7 @@ function generateBabelConfig(
   nativeWind: boolean,
   srcDir: boolean,
   template: string,
-  includeConsoleRemover: boolean = false
+  includeConsoleRemover: boolean = false,
 ) {
   return `
 module.exports = {
@@ -240,7 +259,8 @@ async function updatePackageJson(
   isReactNativeConfig: boolean,
   nativeWind: boolean,
   template: string,
-  includeConsoleRemover: boolean = false
+  includeConsoleRemover: boolean = false,
+  stateManagement?: StateManagementType,
 ) {
   const packageJsonPath = path.join(root, "package.json");
   let existingPackageJson: any = {};
@@ -284,7 +304,8 @@ async function updatePackageJson(
   }
 
   if (includeConsoleRemover) {
-    packageJson.devDependencies["babel-plugin-transform-remove-console"] = "^6.9.4";
+    packageJson.devDependencies["babel-plugin-transform-remove-console"] =
+      "^6.9.4";
   }
 
   if (nativeWind) {
@@ -294,6 +315,12 @@ async function updatePackageJson(
       "react-native-safe-area-context": "^4.14.0",
     });
     packageJson.devDependencies.tailwindcss = "^3.3.2";
+  }
+
+  if (stateManagement === "zustand") {
+    Object.assign(packageJson.dependencies, {
+      zustand: "^4.5.0",
+    });
   }
 
   if (template.includes("navigation")) {
@@ -321,7 +348,7 @@ async function updatePackageJson(
 
   await fs.writeFile(
     packageJsonPath,
-    JSON.stringify(packageJson, null, 2) + os.EOL
+    JSON.stringify(packageJson, null, 2) + os.EOL,
   );
   return packageJson;
 }
@@ -333,16 +360,16 @@ async function updateBuildGradle(root: string) {
     .split("\n")
     .filter((line) => line.startsWith("apply"));
   const lastApplyLineIndex = buildGradleContent.lastIndexOf(
-    applyLines[applyLines.length - 1]
+    applyLines[applyLines.length - 1],
   );
   const updatedBuildGradleContent = [
     buildGradleContent.slice(
       0,
-      lastApplyLineIndex + applyLines[applyLines.length - 1].length
+      lastApplyLineIndex + applyLines[applyLines.length - 1].length,
     ),
     "\napply from: project(':react-native-config').projectDir.getPath() + \"/dotenv.gradle\"",
     buildGradleContent.slice(
-      lastApplyLineIndex + applyLines[applyLines.length - 1].length
+      lastApplyLineIndex + applyLines[applyLines.length - 1].length,
     ),
   ].join("");
   await fs.writeFile(buildGradlePath, updatedBuildGradleContent, "utf8");

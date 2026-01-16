@@ -10,6 +10,11 @@ export type TemplateMode = "default" | "nativewind";
 
 export type EnvPackages = "react-native-config" | "react-native-dotenv";
 
+export type StateManagementType = "none" | "zustand" | "redux-toolkit";
+
+// Planned for later
+// export type StylingType = "stylesheet" | "nativewind" | "restyle" | "unistyles";
+
 export interface GetTemplateFileArgs {
   /**
    * The template to get the file for
@@ -89,6 +94,11 @@ export interface InstallTemplateArgs {
    * If nativewind is selected, the template will be installed with NativeWind
    */
   nativeWind: boolean;
+
+  /**
+   * The state management library to use
+   */
+  stateManagement?: StateManagementType;
 
   /**
    * Whether to skip installing dependencies

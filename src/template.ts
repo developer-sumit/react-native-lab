@@ -6,7 +6,6 @@ import { execSync } from "child_process";
 import picocolors from "picocolors";
 import { copyFiles } from "./helpers/copy";
 import HookTemplates from "./templates/snippets/hooks";
-import ComponentTemplates from "./templates/snippets/components";
 import { GetTemplateFileArgs, InstallTemplateArgs } from "./types";
 
 const { bold, cyan, green } = picocolors;
@@ -33,6 +32,7 @@ export const SRC_DIR_NAMES = ["assets", "screens", "components", "helpers"];
 
 export const installTemplate = async ({
   appName,
+  packageName,
   root,
   packageManager,
   envEnabled,
@@ -100,13 +100,13 @@ export const installTemplate = async ({
   // Replace App.tsx and README.md
   await replaceFile(root, templatePath, "App.tsx", srcDir);
   await replaceFile(root, templatePath, "README.md");
-
   // Update babel.config.js
   const babelConfig = generateBabelConfig(
     isReactNativeDotEnv,
     nativeWind,
     srcDir,
-    template
+    template,
+    includeConsoleRemover
   );
   await fs.writeFile(path.join(root, "babel.config.js"), babelConfig, "utf8");
 
@@ -115,18 +115,17 @@ export const installTemplate = async ({
   await fs.writeFile(
     path.join(root, "tsconfig.json"),
     JSON.stringify(tsConfig, null, 2) + os.EOL
-  );
-
-  // Update package.json
+  );  // Update package.json
   const packageJson = await updatePackageJson(
     root,
     appName,
+    packageName,
     isReactNativeDotEnv,
     isReactNativeConfig,
     nativeWind,
-    template
+    template,
+    includeConsoleRemover
   );
-
   // Add custom hooks
   if (includeCustomHooks && customHooks.length > 0) {
     const hooksDir = path.join(root, srcDir ? "src/hooks" : "hooks");
@@ -138,37 +137,6 @@ export const installTemplate = async ({
       );
     }
     // console.log(green("Custom Hooks added successfully."));
-  }
-
-  // Add ConsoleRemover
-  if (includeConsoleRemover) {
-    const consoleRemoverPath = path.join(
-      root,
-      srcDir ? "src/components" : "components",
-      "ConsoleRemover.tsx"
-    );
-    await fs.mkdir(path.dirname(consoleRemoverPath), { recursive: true });
-    await fs.writeFile(consoleRemoverPath, ComponentTemplates.ConsoleRemover);
-
-    const indexPath = path.join(root, "index.js");
-    let indexContent = await fs.readFile(indexPath, "utf8");
-
-    // Wrap the main component with ConsoleRemover
-    indexContent = indexContent.replace(
-      /AppRegistry\.registerComponent\(appName,\s*\(\)\s*=>\s*App\);/,
-      `import ConsoleRemover from './${
-        srcDir ? "src/components" : "components"
-      }/ConsoleRemover';
-
-AppRegistry.registerComponent(appName, () => () => (
-  <ConsoleRemover>
-    <App />
-  </ConsoleRemover>
-));`
-    );
-
-    await fs.writeFile(indexPath, indexContent);
-    // console.log(green("ConsoleRemover added to index.js successfully."));
   }
 
   // Install dependencies
@@ -221,7 +189,8 @@ function generateBabelConfig(
   isReactNativeDotEnv: boolean,
   nativeWind: boolean,
   srcDir: boolean,
-  template: string
+  template: string,
+  includeConsoleRemover: boolean = false
 ) {
   return `
 module.exports = {
@@ -246,6 +215,7 @@ module.exports = {
       },
     }],
     ${template !== "blank" ? `"react-native-reanimated/plugin",` : ""}
+    ${includeConsoleRemover ? `"transform-remove-console",` : ""}
   ],
 };`;
 }
@@ -270,10 +240,12 @@ function generateTsConfig(srcDir: boolean, template: string) {
 async function updatePackageJson(
   root: string,
   appName: string,
+  packageName: string | undefined,
   isReactNativeDotEnv: boolean,
   isReactNativeConfig: boolean,
   nativeWind: boolean,
-  template: string
+  template: string,
+  includeConsoleRemover: boolean = false
 ) {
   const packageJsonPath = path.join(root, "package.json");
   let existingPackageJson: any = {};
@@ -307,7 +279,6 @@ async function updatePackageJson(
     },
     engines: { ...existingPackageJson.engines },
   };
-
   if (isReactNativeDotEnv) {
     packageJson.devDependencies["react-native-dotenv"] = "^3.4.11";
   }
@@ -315,6 +286,10 @@ async function updatePackageJson(
   if (isReactNativeConfig) {
     packageJson.devDependencies["react-native-config"] = "^1.5.3";
     await updateBuildGradle(root);
+  }
+
+  if (includeConsoleRemover) {
+    packageJson.devDependencies["babel-plugin-transform-remove-console"] = "^6.9.4";
   }
 
   if (nativeWind) {

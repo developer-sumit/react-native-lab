@@ -1,178 +1,313 @@
-import ora from "ora";
+import {
+  intro,
+  outro,
+  text,
+  select,
+  confirm,
+  multiselect,
+  isCancel,
+  cancel,
+  spinner,
+} from "@clack/prompts";
 import colors from "picocolors";
-import inquirer, { Answers } from "inquirer";
 import checkCommand from "./helpers/check-cmd";
 import checkOS, { OS } from "./helpers/check-os";
+import { fetchReactNativeVersions } from "./helpers/fetch-rn-versions";
+import { PackageManager } from "./helpers/get-pkg-manager";
+import { TemplateType, EnvPackages } from "./types";
 
 const { blue, red, green, yellow } = colors;
 
-const checkInstallation = async (name: string, command: string) => {
-  const spinner = ora(blue(`Checking for ${name} installation...`)).start();
-  const isInstalled = checkCommand(command);
-  spinner.stop();
-
-  if (!isInstalled) {
-    spinner.fail(red(`${name} not found.`));
-    return {
-      type: "confirm",
-      name: `install${name.replace(/\s/g, "")}`,
-      message: `Would you like to install ${name}?`,
-      default: true,
-    };
+function handleCancel(value: unknown) {
+  if (isCancel(value)) {
+    cancel("Operation cancelled.");
+    process.exit(0);
   }
+}
 
-  spinner.succeed(green(`${name} is already installed.`));
-  return null;
-};
+export interface PromptResult {
+  projectName: string;
+  srcDir: boolean;
+  template: TemplateType;
+  installJDK?: boolean;
+  installAndroidStudio?: boolean;
+  installNativeWind: boolean;
+  envEnabled: boolean;
+  envPackage: EnvPackages;
+  packageManager: PackageManager;
+  packageName?: string;
+  includeCustomHooks: boolean;
+  selectedHooks: string[];
+  includeConsoleRemover: boolean;
+  reactNativeVersion: string;
+  disableGit?: boolean;
+  setupCI?: boolean;
+}
 
-const questions = [
-  {
-    name: "projectName",
+export default async function prompts(): Promise<PromptResult> {
+  console.clear();
+
+  intro(colors.bgCyan(colors.black(" React Native Lab ")));
+
+  const s = spinner();
+
+  const projectName = await text({
     message: "What is the name of your React Native project?",
-    default: "MyReactNativeApp",
-    validate: (input: string) =>
-      /^[a-zA-Z0-9_]+$/.test(input) ||
-      "Project name can only contain letters, underscores, and hyphens.",
-  },
-  {
-    type: "confirm",
-    name: "srcDir",
-    message: 'Do you want to create a "src" folder for your files?',
-    default: true,
-  },
-  {
-    type: "list",
-    name: "template",
-    message: "Which template would you like to use for your project?",
-    choices: [
-      { name: "Blank", value: "blank" },
-      { name: "Bottom Tab Navigation", value: "bottom-navigation" },
-      { name: "Stack Navigation", value: "stack-navigation" },
-      { name: "Drawer Navigation", value: "drawer-navigation" },
-    ],
-    default: "blank",
-  },
-  {
-    type: "confirm",
-    name: "installNativeWind",
-    message: "Would you like to install NativeWind for styling?",
-    default: false,
-  },
-  {
-    type: "confirm",
-    name: "envEnabled",
-    message: "Do you want to set up a .env file for environment variables?",
-    default: false,
-  },
-  {
-    type: "list",
-    name: "envPackage",
-    message: "Which package would you like to use for environment variables?",
-    choices: ["react-native-config", "react-native-dotenv"],
-    when: (answers: Answers) => answers.envEnabled,
-  },
-  {
-    type: "confirm",
-    name: "enableAdditionalCustomization",
-    message: "Would you like to enable additional customization?",
-    default: false,
-  },
-  {
-    type: "list",
-    name: "packageManager",
-    message: "Which package manager would you like to use?",
-    choices: ["npm", "yarn", "bun"],
-    when: (answers: Answers) => answers.enableAdditionalCustomization,
-  },
-  {
-    type: "confirm",
-    name: "includeCustomHooks",
-    message: "Would you like to include custom hooks in your project?",
-    default: false,
-    when: (answers: Answers) => answers.enableAdditionalCustomization,
-  },
-  {
-    type: "checkbox",
-    name: "selectedHooks",
-    message: "Select the custom hooks you want to include:",
-    choices: [
-      { name: "useDebounce", value: "useDebounce" },
-      { name: "useThrottle", value: "useThrottle" },
-      { name: "usePrevious", value: "usePrevious" },
-      { name: "useOrientation", value: "useOrientation" },
-      { name: "useResponsiveLayout", value: "useResponsiveLayout" },
-    ],
-    when: (answers: Answers) =>
-      answers.includeCustomHooks && answers.enableAdditionalCustomization,
-  },
-  {
-    type: "confirm",
-    name: "includeConsoleRemover",
-    message:
-      "Would you like to include automatic console log removal for production builds?",
-    default: false,
-    when: (answers: Answers) => answers.enableAdditionalCustomization,
-  },
-  {
-    type: "list",
-    name: "reactNativeVersion",
-    message: "Which React Native version would you like to use?",
-    choices: [
-      { name: "Latest", value: "latest" },
-      { name: "0.75.2", value: "0.75.2" },
-      { name: "0.74.6", value: "0.74.6" },
-      { name: "Custom", value: "custom" },
-    ],
-    default: "latest",
-    when: (answers: Answers) => answers.enableAdditionalCustomization,
-  },
-  {
-    type: "input",
-    name: "customReactNativeVersion",
-    message: "Please enter the React Native version you would like to use:",
-    when: (answers: Answers) =>
-      answers.reactNativeVersion === "custom" &&
-      answers.enableAdditionalCustomization,
-    validate: (input: string) =>
-      /^\d+\.\d+\.\d+$/.test(input) || "Please enter a valid version number.",
-  },
-];
+    defaultValue: "MyReactNativeApp",
+    placeholder: "MyReactNativeApp",
+    validate(value) {
+      if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+        return "Project name can only contain letters, underscores, and hyphens.";
+      }
+    },
+  });
+  handleCancel(projectName);
 
-export default async function prompts() {
+  const srcDir = await confirm({
+    message: 'Do you want to create a "src" folder for your files?',
+    initialValue: true,
+  });
+  handleCancel(srcDir);
+
+  const template = await select({
+    message: "Which template would you like to use?",
+    options: [
+      { value: "blank", label: "Blank", hint: "A clean slate" },
+      {
+        value: "bottom-navigation",
+        label: "Bottom Navigation",
+        hint: "Tab bar navigation",
+      },
+      {
+        value: "stack-navigation",
+        label: "Stack Navigation",
+        hint: "Stack based navigation",
+      },
+      {
+        value: "drawer-navigation",
+        label: "Drawer Navigation",
+        hint: "Drawer menu navigation",
+      },
+    ],
+    initialValue: "blank",
+  });
+  handleCancel(template);
+
   const osName = checkOS();
-  const dynamicQuestions = [];
+  let installJDK = false;
+  let installAndroidStudio = false;
 
   if (osName === OS.Windows || osName === OS.Linux) {
-    const jdkQuestion = await checkInstallation("JDK", "java");
-    if (jdkQuestion) dynamicQuestions.push(jdkQuestion);
+    s.start(blue(`Checking for JDK installation...`));
+    const isJDKInstalled = checkCommand("java");
+    if (isJDKInstalled) {
+      s.stop(green(`JDK is already installed.`));
+    } else {
+      s.stop(red(`JDK not found.`));
+      const shouldInstallJDK = await confirm({
+        message: "Would you like to install JDK?",
+        initialValue: true,
+      });
+      handleCancel(shouldInstallJDK);
+      if (shouldInstallJDK) installJDK = true;
+    }
 
+    s.start(blue(`Checking for Android Studio...`));
     const androidStudioCommand =
       osName === OS.Windows ? "studio64.exe" : "studio.sh";
-    const androidStudioQuestion = await checkInstallation(
-      "Android Studio",
-      androidStudioCommand
-    );
-    if (androidStudioQuestion) dynamicQuestions.push(androidStudioQuestion);
-  } else {
-    console.log(
-      yellow("Can't check for JDK and Android Studio installation on this OS.")
-    );
+    const isAndroidStudioInstalled = checkCommand(androidStudioCommand);
+    if (isAndroidStudioInstalled) {
+      s.stop(green(`Android Studio is already installed.`));
+    } else {
+      s.stop(red(`Android Studio not found.`));
+      const shouldInstallAS = await confirm({
+        message: "Would you like to install Android Studio?",
+        initialValue: true,
+      });
+      handleCancel(shouldInstallAS);
+      if (shouldInstallAS) installAndroidStudio = true;
+    }
   }
 
-  const answers = await inquirer.prompt([...dynamicQuestions, ...questions]);
+  const enableAdditionalCustomization = await confirm({
+    message: "Would you like to enable additional customization?",
+    initialValue: false,
+  });
+  handleCancel(enableAdditionalCustomization);
 
-  if (answers.includeConsoleRemover) {
-    console.log(yellow("\nConsole log removal feature included:"));
-    console.log(
-      green("- Automatically removes all console logs in production builds")
-    );
-    console.log("  This improves security and slightly reduces app size");
-    console.log(
-      yellow(
-        "\nThis feature will be added to your project via a ConsoleRemover component."
-      )
-    );
+  // Default values if no customization
+  let packageManager: PackageManager = "npm";
+  let packageName: string | undefined;
+  let reactNativeVersion = "latest";
+  let installNativeWind = false;
+  let envEnabled = false;
+  let envPackage: EnvPackages = "react-native-config";
+  let includeCustomHooks = false;
+  let selectedHooks: string[] = [];
+  let includeConsoleRemover = false;
+  let initGit = true;
+  let setupCI = false;
+
+  if (enableAdditionalCustomization) {
+    // Package Manager
+    const pm = await select({
+      message: "Which package manager would you like to use?",
+      options: [
+        { value: "npm", label: "npm" },
+        { value: "yarn", label: "yarn" },
+        { value: "bun", label: "bun" },
+      ],
+      initialValue: "npm",
+    });
+    handleCancel(pm);
+    packageManager = pm as PackageManager;
+
+    // Package Name
+    const rawProjectName = (projectName as string)
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .replace(/^[0-9]+/, "");
+    const defaultPackageName = `com.${rawProjectName}.app`;
+
+    const pkgName = await text({
+      message: "What should be the package name?",
+      defaultValue: defaultPackageName,
+      placeholder: defaultPackageName,
+      validate(value) {
+        if (value && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/.test(value)) {
+          return "Package name must be in format: com.example.myapp";
+        }
+      },
+    });
+    handleCancel(pkgName);
+    packageName = pkgName as string;
+
+    // React Native Version
+    s.start(blue("Fetching available React Native versions..."));
+    const versions = await fetchReactNativeVersions();
+    s.stop(green("Versions fetched."));
+
+    const rnVersion = await select({
+      message: "Which React Native version would you like to use?",
+      options: versions.map((v) => ({ value: v.value, label: v.name })),
+      initialValue: "latest",
+    });
+    handleCancel(rnVersion);
+
+    if (rnVersion === "custom") {
+      const customVersion = await text({
+        message: "Please enter the React Native version:",
+        validate(value) {
+          if (!/^\d+\.\d+\.\d+$/.test(value))
+            return "Please enter a valid version number.";
+        },
+      });
+      handleCancel(customVersion);
+      reactNativeVersion = customVersion as string;
+    } else {
+      reactNativeVersion = rnVersion as string;
+    }
+
+    // NativeWind
+    const wind = await confirm({
+      message: "Would you like to install NativeWind for styling?",
+      initialValue: false,
+    });
+    handleCancel(wind);
+    installNativeWind = wind as boolean;
+
+    // Env Vars
+    const env = await confirm({
+      message: "Do you want to set up a .env file for environment variables?",
+      initialValue: false,
+    });
+    handleCancel(env);
+    envEnabled = env as boolean;
+
+    if (envEnabled) {
+      const ep = await select({
+        message: "Which package for environment variables?",
+        options: [
+          {
+            value: "react-native-config",
+            label: "react-native-config",
+            hint: "Recommended",
+          },
+          { value: "react-native-dotenv", label: "react-native-dotenv" },
+        ],
+        initialValue: "react-native-config",
+      });
+      handleCancel(ep);
+      envPackage = ep as EnvPackages;
+    }
+
+    // Custom Hooks
+    const hooks = await confirm({
+      message: "Would you like to include custom hooks?",
+      initialValue: false,
+    });
+    handleCancel(hooks);
+    includeCustomHooks = hooks as boolean;
+
+    if (includeCustomHooks) {
+      const sh = await multiselect({
+        message: "Select custom hooks to include:",
+        options: [
+          { value: "useDebounce", label: "useDebounce" },
+          { value: "useThrottle", label: "useThrottle" },
+          { value: "usePrevious", label: "usePrevious" },
+          { value: "useOrientation", label: "useOrientation" },
+          { value: "useResponsiveLayout", label: "useResponsiveLayout" },
+        ],
+        required: false,
+      });
+      handleCancel(sh);
+      selectedHooks = sh as string[];
+    }
+
+    // Console Remover
+    const consoleRemove = await confirm({
+      message: "Include automatic console log removal in production?",
+      initialValue: false,
+    });
+    handleCancel(consoleRemove);
+    includeConsoleRemover = consoleRemove as boolean;
+
+    // Git Init
+    const git = await confirm({
+      message: "Initialize a new git repository?",
+      initialValue: true,
+    });
+    handleCancel(git);
+    initGit = git as boolean;
+
+    // CI Setup
+    const ci = await confirm({
+      message: "Add GitHub Actions CI workflow?",
+      initialValue: false,
+    });
+    handleCancel(ci);
+    setupCI = ci as boolean;
   }
 
-  return answers;
+  outro(colors.green("Configuration complete! Starting setup..."));
+
+  return {
+    projectName: projectName as string,
+    srcDir: srcDir as boolean,
+    template: template as TemplateType,
+    installJDK,
+    installAndroidStudio,
+    installNativeWind,
+    envEnabled,
+    envPackage,
+    packageManager,
+    packageName,
+    includeCustomHooks,
+    selectedHooks,
+    includeConsoleRemover,
+    reactNativeVersion,
+    disableGit: !initGit,
+    setupCI,
+  };
 }

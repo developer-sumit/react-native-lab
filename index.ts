@@ -8,7 +8,21 @@ import { installJDK, installAndroidStudio } from "./src/install-scripts";
 
 /** Main setup function */
 async function setup() {
-  const prompt = await prompts();
+  // Check for config from environment variable (for testing/automation)
+  const envConfig = process.env.RN_LAB_CONFIG;
+  let prompt;
+
+  if (envConfig) {
+    try {
+      prompt = JSON.parse(envConfig);
+      console.log("Using configuration from environment variable.");
+    } catch (e) {
+      console.error("Failed to parse RN_LAB_CONFIG.");
+      process.exit(1);
+    }
+  } else {
+    prompt = await prompts();
+  }
 
   if (prompt.installJDK) {
     await retry(installJDK);
@@ -17,28 +31,22 @@ async function setup() {
   if (prompt.installAndroidStudio) {
     await retry(installAndroidStudio);
   }
-
   // Create the React Native project with user inputs
   await createReactNative({
     appPath: prompt.projectName,
-    packageManager: prompt.packageManager ? prompt.packageManager : "npm",
-    reactNativeVersion:
-      prompt.reactNativeVersion === "custom"
-        ? prompt.customReactNativeVersion
-        : prompt.reactNativeVersion || "latest",
+    packageManager: prompt.packageManager,
+    reactNativeVersion: prompt.reactNativeVersion,
+    packageName: prompt.packageName,
     srcDir: prompt.srcDir,
     nativeWind: prompt.installNativeWind,
-    envEnabled: prompt.envEnabled ? prompt.envEnabled : false,
-    envPackage: prompt.envPackage ? prompt.envPackage : "react-native-config",
-    includeCustomHooks: prompt.includeCustomHooks
-      ? prompt.includeCustomHooks
-      : false,
-    customHooks: prompt.selectedHooks ? prompt.selectedHooks : [],
-    includeConsoleRemover: prompt.includeConsoleRemover
-      ? prompt.includeConsoleRemover
-      : false,
+    envEnabled: prompt.envEnabled,
+    envPackage: prompt.envPackage,
+    includeCustomHooks: prompt.includeCustomHooks,
+    customHooks: prompt.selectedHooks,
+    includeConsoleRemover: prompt.includeConsoleRemover,
     template: prompt.template,
     disableGit: prompt.disableGit,
+    setupCI: prompt.setupCI,
     skipInstall: false,
   });
 }

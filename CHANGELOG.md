@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-01-16
+
+### 🚀 New Features
+
+- **Revamped CLI Design**: A completely new, modern, and interactive CLI experience using `@clack/prompts`.
+- **CI/CD Integration**: Automatically generate GitHub Actions workflows for Linting and Testing.
+- **Git Initialization**: Explicit option to initialize a Git repository.
+- **Console Log Removal**: Added option to strip console logs in production builds.
+
+### ✨ Improvements
+
+- **Interactive Prompts**: Smoother and more visual prompts with better error handling and cancellation support.
+- **Project Setup**: clearer steps and spinners for long-running tasks.
+- **Validation**: Improved validation for package names and versions.
+
 ## [1.1.0] - 2024-12-15
 
 ### New Features

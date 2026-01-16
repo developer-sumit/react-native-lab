@@ -2,7 +2,6 @@ import os from "os";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
-import { execSync } from "child_process";
 import picocolors from "picocolors";
 import { copyFiles } from "./helpers/copy";
 import HookTemplates from "./templates/snippets/hooks";
@@ -32,7 +31,6 @@ export const SRC_DIR_NAMES = ["assets", "screens", "components", "helpers"];
 
 export const installTemplate = async ({
   appName,
-  packageName,
   root,
   packageManager,
   envEnabled,
@@ -43,7 +41,6 @@ export const installTemplate = async ({
   template,
   srcDir,
   nativeWind,
-  skipInstall,
 }: InstallTemplateArgs) => {
   console.log(bold(`Using ${packageManager}.`));
   const isReactNativeDotEnv =
@@ -119,7 +116,6 @@ export const installTemplate = async ({
   const packageJson = await updatePackageJson(
     root,
     appName,
-    packageName,
     isReactNativeDotEnv,
     isReactNativeConfig,
     nativeWind,
@@ -240,7 +236,6 @@ function generateTsConfig(srcDir: boolean, template: string) {
 async function updatePackageJson(
   root: string,
   appName: string,
-  packageName: string | undefined,
   isReactNativeDotEnv: boolean,
   isReactNativeConfig: boolean,
   nativeWind: boolean,

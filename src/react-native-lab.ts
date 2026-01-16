@@ -2,15 +2,7 @@
 import colors from "picocolors";
 import { execSync } from "node:child_process";
 import { basename, dirname, join, resolve } from "node:path";
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-  readdirSync,
-  renameSync,
-} from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { rmSync } from "node:fs";
 
 import { getTemplateFile, installTemplate } from "./template";
@@ -22,11 +14,7 @@ import { PackageManager } from "./helpers/get-pkg-manager";
 import { EnvPackages, TemplateType } from "./types";
 import { setupCI as initCI } from "./helpers/ci";
 
-function fixAndroidPackageStructure(
-  root: string,
-  packageName: string,
-  appName: string,
-) {
+function fixAndroidPackageStructure(root: string, packageName: string) {
   const androidJavaPath = join(root, "android", "app", "src", "main", "java");
 
   if (!existsSync(androidJavaPath)) {
@@ -171,7 +159,7 @@ export default async function createReactNative({
 
   // Fix Android package structure if a custom package name was provided
   if (packageName) {
-    fixAndroidPackageStructure(root, packageName, appName);
+    fixAndroidPackageStructure(root, packageName);
   }
 
   // Copy `.gitignore` if the application did not provide one

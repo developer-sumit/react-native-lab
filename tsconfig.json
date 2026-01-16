@@ -19,7 +19,16 @@
     // Skips type checking of declaration files (can speed up compilation)
     "skipLibCheck": true,
     // Ensures that file names are case-sensitive
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    // Report unused locals and parameters
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    // Prevent fallthrough in switch statements
+    "noFallthroughCasesInSwitch": true,
+    // Require explicit override keyword when overriding
+    "noImplicitOverride": true,
+    // Ensure index access is intentional
+    "noPropertyAccessFromIndexSignature": true
   },
   "exclude": ["node_modules", "dist", "./src/templates"]
 }

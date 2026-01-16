@@ -16,7 +16,7 @@ import { fetchReactNativeVersions } from "./helpers/fetch-rn-versions";
 import { PackageManager } from "./helpers/get-pkg-manager";
 import { TemplateType, EnvPackages } from "./types";
 
-const { blue, red, green, yellow } = colors;
+const { blue, red, green } = colors;
 
 function handleCancel(value: unknown) {
   if (isCancel(value)) {

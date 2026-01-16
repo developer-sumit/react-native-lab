@@ -9,7 +9,7 @@ import { installJDK, installAndroidStudio } from "./src/install-scripts";
 /** Main setup function */
 async function setup() {
   // Check for config from environment variable (for testing/automation)
-  const envConfig = process.env.RN_LAB_CONFIG;
+  const envConfig = process.env["RN_LAB_CONFIG"];
   let prompt;
 
   if (envConfig) {

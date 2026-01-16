@@ -19,7 +19,7 @@ export async function installChocolatey() {
       return;
     }
     spinner.info(
-      colors.yellow("Running Chocolatey installation as non-admin...")
+      colors.yellow("Running Chocolatey installation as non-admin..."),
     );
     const scriptPath = getScriptPath("installChocolately.ps1");
     // Execute the PowerShell script for non-admin installation
@@ -27,11 +27,13 @@ export async function installChocolatey() {
       stdio: "inherit",
     });
     spinner.succeed(
-      colors.green("Chocolatey installed successfully (non-admin).")
+      colors.green("Chocolatey installed successfully (non-admin)."),
     );
     // Add Chocolatey to the current session's PATH
-    const chocoPath = `${process.env.ProgramData}\\chocoportable\\bin`;
-    process.env.PATH = `${process.env.PATH};${chocoPath}`;
+    const programData = process.env["ProgramData"] || "C:\\ProgramData";
+    const chocoPath = `${programData}\\chocoportable\\bin`;
+    const currentPath = process.env["PATH"] || "";
+    process.env["PATH"] = `${currentPath};${chocoPath}`;
   } catch (error) {
     spinner.fail(colors.red("Failed to install Chocolatey."));
     console.error(error);
@@ -68,11 +70,11 @@ export async function installJDK() {
           stdio: "inherit",
         });
         spinner.succeed(
-          colors.green("JAVA_HOME environment variable set successfully.")
+          colors.green("JAVA_HOME environment variable set successfully."),
         );
       } catch (error) {
         spinner.fail(
-          colors.red("Failed to set JAVA_HOME environment variable.")
+          colors.red("Failed to set JAVA_HOME environment variable."),
         );
         throw error;
       }
@@ -102,18 +104,18 @@ export async function installJDK() {
         });
         execSync("source ~/.bashrc", { stdio: "inherit" });
         spinner.succeed(
-          colors.green("JAVA_HOME environment variable set successfully.")
+          colors.green("JAVA_HOME environment variable set successfully."),
         );
       } catch (error) {
         spinner.fail(
-          colors.red("Failed to set JAVA_HOME environment variable.")
+          colors.red("Failed to set JAVA_HOME environment variable."),
         );
         throw error;
       }
     }
   } else {
     spinner.fail(
-      colors.red("Please install OpenJDK manually on this operating system.")
+      colors.red("Please install OpenJDK manually on this operating system."),
     );
   }
 }
@@ -129,11 +131,11 @@ export async function installAndroidStudio() {
     await installChocolatey();
   }
   const androidStudioPath = path.join(
-    process.env.ProgramFiles || "C:\\Program Files",
+    process.env["ProgramFiles"] || "C:\\Program Files",
     "Android",
     "Android Studio",
     "bin",
-    "studio.exe"
+    "studio.exe",
   );
 
   if (process.platform === "win32") {
@@ -163,14 +165,14 @@ export async function installAndroidStudio() {
 
     // Set ANDROID_HOME environment variable
     const androidHomePath = path.join(
-      process.env.ProgramFiles || "C:\\Program Files",
+      process.env["ProgramFiles"] || "C:\\Program Files",
       "Android",
-      "Sdk"
+      "Sdk",
     );
 
     if (!fs.existsSync(androidHomePath)) {
       pathSpinner.fail(
-        colors.red("Android SDK not found. Please install Android Studio.")
+        colors.red("Android SDK not found. Please install Android Studio."),
       );
       return;
     }
@@ -185,17 +187,17 @@ export async function installAndroidStudio() {
 
       execSync(
         `setx PATH "%PATH%;${androidHomePath}\\tools;${androidHomePath}\\platform-tools" /M`,
-        { stdio: "inherit" }
+        { stdio: "inherit" },
       );
 
       pathSpinner.succeed(
-        colors.green("Android Studio added to PATH successfully.")
+        colors.green("Android Studio added to PATH successfully."),
       );
     } catch (error) {
       pathSpinner.fail(
         colors.red(
-          "Failed to set ANDROID_HOME and ANDROID_SDK_ROOT environment variables."
-        )
+          "Failed to set ANDROID_HOME and ANDROID_SDK_ROOT environment variables.",
+        ),
       );
       console.error(error);
       throw error;
@@ -219,14 +221,14 @@ export async function installAndroidStudio() {
 
     // Set ANDROID_HOME environment variable
     const androidHomePath = path.join(
-      process.env.HOME || "/home/user",
+      process.env["HOME"] || "/home/user",
       "Android",
-      "Sdk"
+      "Sdk",
     );
 
     if (!fs.existsSync(androidHomePath)) {
       pathSpinner.fail(
-        colors.red("Android SDK not found. Please install Android Studio.")
+        colors.red("Android SDK not found. Please install Android Studio."),
       );
       return;
     }
@@ -239,24 +241,24 @@ export async function installAndroidStudio() {
         `echo "export ANDROID_SDK_ROOT=${androidHomePath}" >> ~/.bashrc`,
         {
           stdio: "inherit",
-        }
+        },
       );
       execSync(
         `echo "export PATH=$PATH:${androidHomePath}/tools:${androidHomePath}/platform-tools" >> ~/.bashrc`,
         {
           stdio: "inherit",
-        }
+        },
       );
       execSync("source ~/.bashrc", { stdio: "inherit" });
 
       pathSpinner.succeed(
-        colors.green("Android Studio added to PATH successfully.")
+        colors.green("Android Studio added to PATH successfully."),
       );
     } catch (error) {
       pathSpinner.fail(
         colors.red(
-          "Failed to set ANDROID_HOME and ANDROID_SDK_ROOT environment variables."
-        )
+          "Failed to set ANDROID_HOME and ANDROID_SDK_ROOT environment variables.",
+        ),
       );
       console.error(error);
       throw error;
@@ -264,8 +266,8 @@ export async function installAndroidStudio() {
   } else {
     spinner.fail(
       colors.red(
-        "Please install Android Studio manually on this operating system."
-      )
+        "Please install Android Studio manually on this operating system.",
+      ),
     );
   }
 }

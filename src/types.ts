@@ -35,6 +35,11 @@ export interface InstallTemplateArgs {
   appName: string;
 
   /**
+   * The package name for the app
+   */
+  packageName?: string;
+
+  /**
    * The root directory of the app
    */
   root: string;

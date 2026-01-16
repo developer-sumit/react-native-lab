@@ -7,7 +7,7 @@ export type PackageManager = "npm" | "yarn" | "bun";
  * If no specific package manager is detected, defaults to "npm".
  */
 export default function getPkgManager(): PackageManager {
-  const userAgent = process.env.npm_config_user_agent || "";
+  const userAgent = process.env["npm_config_user_agent"] || "";
 
   if (userAgent.startsWith("npm")) {
     return "npm";

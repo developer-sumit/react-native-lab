@@ -17,6 +17,14 @@ All notable changes to this project will be documented in this file.
 - **Project Setup**: clearer steps and spinners for long-running tasks.
 - **Validation**: Improved validation for package names and versions.
 
+### 🛠️ Internal / Developer Experience
+
+- **Admin CLI**: Added `scripts/admin.ts` for internal maintenance.
+  - **Dependency Check**: `npx tsx scripts/admin.ts check-updates` to check for outdated template packages.
+  - **Test Generator**: `npx tsx scripts/admin.ts test-gen` for headless end-to-end testing.
+- **Auto-Publish Workflow**: GitHub Action updated to auto-publish to NPM on version bump.
+- **Refactoring**: Cleaned up `scripts/admin.ts` to be production-ready code.
+
 ## [1.1.0] - 2024-12-15
 
 ### New Features

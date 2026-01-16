@@ -1,13 +1,8 @@
 import { program } from "commander";
 import chalk from "chalk";
-// import { table } from "table";
-// import latestVersion from "latest-version";
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-
-// We need to read src/template.ts to find the versions.
-// Since it's TS, we'll listen for regex matches rather than importing it directly to avoid build steps for this script.
 
 const TEMPLATE_FILE_PATH = path.join(process.cwd(), "src", "template.ts");
 
@@ -75,7 +70,7 @@ program
       includeConsoleRemover: true,
       reactNativeVersion: "latest",
       disableGit: true,
-      setupCI: true, // test new feature
+      setupCI: true,
     };
 
     const env = {
@@ -91,9 +86,6 @@ program
 
     console.log(chalk.cyan(`Starting test generation for ${name}...`));
     try {
-      // We use ts-node to run the source directly, or node dist/index.js if built
-      // Using npm run test which maps to "node ./dist/index.js" but we need to pass env
-      // Let's call node directy
       const distPath = path.join(process.cwd(), "dist", "index.js");
       if (!fs.existsSync(distPath)) {
         console.log(chalk.yellow("Dist not found, building..."));
